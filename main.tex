@@ -1,0 +1,1104 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{tikz}
+\newcommand{\tikzmark}[1]{\tikz[baseline,remember picture] \coordinate (#1) {};}
+
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{listings}
+\usepackage{xcolor}
+\lstdefinestyle{mypython}{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{gray},
+    stringstyle=\color{green!50!black},
+    numberstyle=\tiny\color{gray},
+    numbers=left,
+    stepnumber=1,
+    showstringspaces=false,
+    breaklines=true,
+    frame=single
+}
+
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\title{Power Series Stochastic Modeling}
+\author{Ryan Avallone and Arash Fahim and Cruz Fuller and Richard Tairouz Aslam}
+\date{May 2025}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+Here is our project \ldots\\
+First, we are going to find the eigenvalue and eigenfunction
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.75\linewidth]{Stochastic Modeling.jpeg}
+    \caption{Stochastic Modeling}
+    \label{fig:enter-label}
+\end{figure}
+\clearpage
+\section{Find Eigenvalue and Eigenfunction in 2D}
+\subsection{Separation of Variables}
+
+Assume a solution of the form:
+\[
+u(t, r) = G(t)\phi(r)
+\]
+Then,
+\[
+\frac{\partial u}{\partial t} = G'(t)\phi(r)
+\]
+and the spatial part is:
+\[
+\frac{1}{2} \left( \phi''(r) + \frac{1}{r} \phi'(r) \right) = \text{(spatial operator)}
+\]
+Substitute into the original PDE:
+\[
+G'(t)\phi(r) = \frac{1}{2} \cdot G(t) \cdot \left( \phi''(r) + \frac{1}{r}\phi'(r) \right)
+\]
+Divide both sides by \( G(t)\phi(r) \):
+\[
+\frac{G'(t)}{G(t)} = \frac{1}{2} \cdot \frac{ \phi''(r) + \frac{1}{r}\phi'(r) }{ \phi(r) }
+\]
+Since the left side depends only on \( t \) and the right side only on \( r \), both sides must equal a constant, say \( -\lambda \). Thus:
+\[
+\frac{G'(t)}{G(t)} = -\lambda, \quad \text{and} \quad \frac{1}{2} \cdot \frac{ \phi''(r) + \frac{1}{r}\phi'(r) }{ \phi(r) } = -\lambda
+\]
+This gives two ODEs:
+\begin{align*}
+G'(t) + \lambda G(t) &= 0 \\
+\phi''(r) + \frac{1}{r}\phi'(r) + 2\lambda \phi(r) &= 0
+\end{align*}
+Solving the time equation:
+\[
+G(t) = C_1 e^{-\lambda t}
+\]
+Solving the Bessel Differential Equation
+\[
+\phi''(r) + \frac{1}{r}\phi'(r) + 2\lambda \phi(r) = 0
+\]
+Let \(\mu^2 = 2\lambda r^2\), then the spatial equation becomes:
+\[
+\phi''(r) + \frac{1}{r} \phi'(r) + \mu^2 \phi(r) = 0
+\]
+We will follow the method of 
+Frobenius and look for the solution as a power series
+\[
+y = x^s\sum_{n=0}^{\infty}a_nx^n
+\]
+\[
+y'= (n+s)\sum_{n=0}^{\infty}a_nx^{n+s-1}
+\]
+\[
+y''=(n+s)(n+s-1)\sum_{n=0}^{\infty}a_nx^{n+s-2}
+\]
+We will substitute the series back into the Bessel equation
+\[
+r^2[(n+s)(n+s-1)\sum_{n=0}^{\infty}a_nx^{n+s-2}]
++ r[(n+s)\sum_{n=0}^{\infty}a_nx^{n+s-1}]
++\sum_{n=0}^{\infty}\mu^2a_nx^{n+s}
+\]
+Next we will combine similar sums:
+\[
+\sum_{n=0}^\infty[((n+s)^2-\mu^2)a_n + a_{n-2}] r^{n+s}
+\]
+Indicial Equation (from \( n = 0 \)):
+\[
+[(s^2 - \mu^2) a_0] r^s = 0 \quad \Rightarrow \quad s^2 = \mu^2 \Rightarrow s = \pm\mu
+\]
+So the roots are \( s = \mu \) and \( s = -\mu \).\\
+For \( n = 1 \):
+\[
+[(1 + s)^2 - \mu^2] a_1 = 0
+\]
+For \( n=2\):
+\[
+a_2 = -\frac{a_0}{(2 + \mu)^2 - \mu^2}
+= -\frac{a_0}{4 + 4\mu}
+= -\frac{a_0}{4(1 + \mu)}
+\]
+For \( n=4\):
+\[
+a_4 = -\frac{a_2}{(4 + \mu)^2 - \mu^2}
+= -\frac{a_2}{16 + 8\mu}
+= \frac{a_0}{32(1 + \mu)(2 + \mu)}
+\]
+For \( n=6\):
+\[
+a_6 = -\frac{a_4}{(6 + \mu)^2 - \mu^2}
+= -\frac{a_4}{36 + 12\mu}
+= -\frac{a_0}{384(1 + \mu)(2 + \mu)(3 + \mu)}
+\]
+Thus, the series solution becomes:
+let \(k=2n\):
+\[
+a_{2k} = \frac{(-1)^k a_0}{2^{2k}k!(1 + \mu)(2 + \mu) \cdots (k + \mu)}
+\]
+Choosing \(a_0=\frac{1}{2^\mu\Gamma(\mu+1)}\):
+\[
+J_0(r) = \sum_{k=0}^{\infty} \frac{(-1)^k}{(k!)^2} \left( \frac{r}{2} \right)^{2k}
+\]
+The Bessel equation solution is:
+\[
+\phi(r) = A J_0(\mu r)
+\]
+The general solution is
+\[
+u(t, r) = A e^{-\frac{\mu^2}{2} t} J_0(\mu r)
+\]
+\subsection{Applying the Boundary Condition for 2D }
+
+Plugging in the boundary condition \( u(t, R) = 0 \), we get:
+\[
+u(t, R) = G(t)\phi(R) = 0 \quad \Rightarrow \quad \phi(R) = 0
+\]
+\[
+\phi(R) = A J_0(\mu R) = 0 \quad \Rightarrow \quad J_0(\mu R) = 0
+\]
+where \(\mu = \sqrt{2\lambda}\).
+Then, the general solution 
+\[
+u(t, r) = A e^{-\frac{\mu^2}{2} t} J_0(\mu r)
+\]
+
+Since \(J_0(\sqrt{2\lambda} R) = 0\), it follows that
+\[
+\sqrt{2\lambda} R = Z,
+\]
+where \(Z_n\) is the $n$th positive zero of \(J_0\). Thus,
+\[
+\lambda = \frac{1}{2} \left( \frac{Z}{R} \right)^2
+\]
+then,
+\[
+\lambda_n = \frac{1}{2} \left( \frac{Z_n}{R}\right)^2
+\]
+\subsection{Genearl Soulction for 2D Heat Equation}
+
+Thus, the general solution can be written as a Bessel series:
+\[
+u(t, r) = \sum_{n=1}^\infty A_n e^{- \lambda_n t} J_0\left( \frac{Z_n}{R} r \right),
+\]
+where:
+\[
+\lambda_n = \frac{1}{2} \left( \frac{Z_n}{R} \right)^2,
+\]
+and \( Z_n \) is the \( n \)-th zero of the Bessel function \( J_0 \).
+
+{\color{red}Arash: Overall, it looks correct. I should check the details more carefully later. I suppose the next step is to find the coefficients $A_n$ using the formula that Richard showed me in the last meeting.}
+
+\subsection{Finding the Coefficients \(A_n\)}
+
+We are given the initial condition:
+\[
+u(0, r) = f(r) = 1.
+\]
+
+{\color{red}Arash: 
+Recall that with $u(0, r) = f(r) = 1$ the solution $u(t,r)$ correspond with the probability that Brownian motion does not hit the lateral boundary at time $T$. To familiarize you with the notation, we can express this in mathematical language by
+{\Large
+\[
+u(T,r)=\tikzmark{P}\mathbb{P}\left(\max_{t\in[0,T]}|B_t|\tikzmark{maxdist}<R\Big||B_0|\tikzmark{given}=r\right)
+\]
+\begin{tikzpicture}[overlay,remember picture]
+    \node (Pr) [below of = P, node distance = 3 em, anchor=south]{\large \textsf{Probability}};
+    \draw[<-, in=180, out=-90] (P.south)++(.25em,-.5ex) to (Pr.west);
+
+    \node (max) [below of = P, node distance = 4 em, anchor=west] {\large \textsf{Maximum distance to center $<R$}};
+    \draw[<-, in=180, out=-90] (maxdist.south)++(.25em,-.5ex) to (max.west);
+    
+    \node (cond) [below of = P, node distance = 5 em, anchor=west] {\large \textsf{Given $B_0$ distance to center $=r$}};
+    \draw[<-, in=0, out=-90] (given.south)++(.75em,-.5ex) to (cond.east);
+\end{tikzpicture}
+}
+\vspace{2cm}
+
+One possible modification of the initial value is
+\[
+u(0, r) = f(r) = 
+\begin{cases}
+    1& r\le \rho\\
+    0&r>\rho
+\end{cases}
+\]
+In this case, the solution and its interpretation are different:
+{\Large 
+\begin{equation}\label{eqn:cdf_B_T}
+u(T,r,R,\rho)= \mathbb{P}\left(\max_{t\in[0,T]}|B_t| < R \text{ and } |B_T| \tikzmark{cdf}\le  \rho \Big||B_0|=r\right)
+\end{equation}
+\begin{tikzpicture}[overlay,remember picture]
+    \node (cdfrho) [below of = cdf, node distance = 4 em, anchor=south]{\large \textsf{Distance of $B_T$ to center $\le\rho$}};
+    \draw[<-, in=180, out=-90] (cdf.south)++(.25em,-.5ex) to (cdfrho.west);
+
+\end{tikzpicture}
+}
+\vspace{2cm}
+
+In other world, $u(T,r)$ gives the probability that the Brownian motion survives hitting boundary until time $T$ and, at time $T$, its distance to center of sphere does not exceed $\rho$. If we introduce $\rho$ as a variable, $u(T,r,\rho)$ is the \emph{cumulative probability distribution} of $|B_T|$ when $B$ survives hitting the boundary. When cumulative distribution is given, generating random samples according to distribution is simple.
+
+}
+
+\textbf{Step 1: Write the general solution at \(t = 0\)}  
+\[
+u(0, r) = \sum_{n=1}^\infty A_n J_0\left( \frac{Z_n}{R} r \right)
+\]
+
+\textbf{Step 2: Multiply both sides by } \( r J_0\left( \frac{Z_m}{R} r \right) \) \textbf{ and integrate from } \( 0 \) \textbf{ to } \( R \):
+\[
+\int_0^R 1 \cdot r J_0\left( \frac{Z_m}{R} r \right) \, dr
+= \sum_{n=1}^\infty A_n \int_0^R r J_0\left( \frac{Z_n}{R} r \right) J_0\left( \frac{Z_m}{R} r \right) \, dr
+\]
+
+\textbf{Step 3: Use orthogonality of Bessel functions:}  
+\[
+\int_0^R r J_0\left( \frac{Z_n}{R} r \right) J_0\left( \frac{Z_m}{R} r \right) \, dr
+= 0 \quad \text{if } n \ne m
+\]
+\[
+\int_0^R r J_0\left( \frac{Z_n}{R} r \right) J_0\left( \frac{Z_n}{R} r \right) \, dr
+= \frac{R^2}{2}[J_1(Z_n)]^2 \quad \text{if } n = m
+\]
+
+\textbf{Step 4: Solve for } \( A_n \):
+\[
+A_n = \frac{
+\int_0^R r \cdot u(0, r) \cdot J_0\left( \frac{Z_n}{R} r \right) \, dr
+}{
+\int_0^R r \cdot \left[J_0\left( \frac{Z_n}{R} r \right)\right]^2 \, dr
+}
+= \frac{
+\int_0^R r \cdot J_0\left( \frac{Z_n}{R} r \right) \, dr
+}{
+\int_0^R r \cdot \left[J_0\left( \frac{Z_n}{R} r \right)\right]^2 \, dr
+}.
+\]
+\[
+A_n = \frac{2}{R^2 [J_1(Z_n)]^2} \int_0^R r \cdot J_0\left( \frac{Z_n}{R} r \right) \, dr
+\]
+
+\textbf{Step 5: Use known integral:}
+\[
+\int_0^R r J_0\left( \frac{Z_n}{R} r \right) \, dr = \frac{R^2}{Z_n} J_1(Z_n)
+\]
+
+\textbf{Therefore:}
+\[
+A_n = \frac{2}{R^2 [J_1(Z_n)]^2} \cdot \frac{R^2}{Z_n} J_1(Z_n)
+= \frac{2}{Z_n J_1(Z_n)}
+\]
+
+\[
+\boxed{
+A_n = \frac{2}{Z_n J_1(Z_n)}
+}
+\]
+
+\textbf{Hence:}
+\[
+u(t, r) = \sum_{n=1}^{\infty}\left(\frac{2}{Z_nJ_1(Z_n)} \right)
+e^{- \frac{1}{2} \left( \frac{Z_n}{R} \right)^2 t} \cdot J_0\left( \frac{Z_n}{R} r \right),
+\]
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{Cylindrical Bessel Equation.png}
+    \caption{Bessel Functions $J_0\left(\frac{{Z_{{{n}}}}}{{R}} r\right)$ on $[0,1]$}
+    \label{fig:enter-label}
+\end{figure}
+{\color{red}Arash: find out how to evaluate roots of Bessel functions in Python.}
+\newpage
+\section{Roots of Bessel Functions in Python}
+\begin{lstlisting}[style = mypython]
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.special import jv
+from scipy.optimize import brentq
+
+def bessel_Roots_for_dimension(n, num_roots=6):
+    if n <= 2:
+        print("Dimension must be at least 2.")
+    # V = (n - 2)/2
+    order = (n - 2) / 2
+    x = np.linspace(0.01, 10*np.pi, 1000)
+    y = jv(order, x)
+
+    # Find roots
+    roots = []
+    step = 0.1
+    x0 = 0.1
+    while x0 < 30 and len(roots) < num_roots:
+        if jv(order, x0) * jv(order, x0 + step) < 0:
+           root = brentq(lambda x: jv(order, x), x0, x0 + step)
+           roots.append(root)
+        x0 += step
+    return roots
+
+bessel_Roots_for_dimension(2, 6)
+\end{lstlisting}
+\newpage
+\section{The Heat Equation in Sphere Coordinates}
+We know that the Sphere Coordinates are:
+\begin{itemize}
+    \item \(x=r\sin\theta \cos\phi\)
+    \item \(y=r\sin\theta \sin\phi\)
+    \item \(z=\cos\theta\)
+\end{itemize}
+Recall that our heat equation:
+\[
+\frac{\partial u}{\partial t}
+=\frac{1}{2}\Delta u
+= \frac{1}{2} \left(
+\frac{\partial u^2}{\partial r^2}+
+\frac{1}{r} \frac{\partial u}{\partial t}+
+\frac{1}{r^2} \frac{\partial u^2}{\partial \theta}
+\right)
+\]
+Now we are going to change into sphere coordinate:
+\begin{align*}
+\frac{\partial u}{\partial t}
+  &= \frac{1}{2} \nabla ^2u \\
+  &= \frac{1}{2} \left[
+      \frac{1}{r^2} \frac{\partial}{\partial r} \left( r^2 \frac{\partial u}{\partial r} \right)
+    + \frac{1}{r^2 \sin\theta} \frac{\partial}{\partial \theta} \left( \sin\theta \frac{\partial u}{\partial \theta} \right)
+    + \frac{1}{r^2 \sin^2\theta} \frac{\partial^2 u}{\partial \phi^2}
+    \right]
+\end{align*}
+{\color{orange}I have question regrading if u depend on \(\theta\) and \(\phi\) if not will the equation will be decrease into 1-D Heat Equation.}\\
+{\color{red}Arash: If the initial condition, $u(0,r,\theta,\phi)=f(r,\theta,\phi)$, is independent of $\theta$ and $\phi$, i.e.,  $u(0,r,\theta,\phi)=f(r)$, then $u(t,r,\theta,\phi)=u(t,r)$. In this case, it is not a classical 1-D heat equation, $u_t=\frac12u_{xx}$. It is a different equation described by $u_t=\frac{1}{2r^2} \frac{\partial}{\partial r} \left( r^2 \frac{\partial u}{\partial r} \right)$}
+
+\subsection{Assumption: Spherical Symmetry}
+
+Assume $u(t, r, \theta, \phi) = u(t, r)$, i.e., $u$ is independent of $\theta$ and $\phi$. Then the Laplacian simplifies to its radial part:
+\[
+\Delta u = \frac{1}{r^2} \frac{\partial}{\partial r} \left( r^2 \frac{\partial u}{\partial r} \right)
+\]
+
+Thus, the heat equation becomes:
+\[
+\frac{\partial u}{\partial t} = \frac{1}{2r^2} \frac{\partial}{\partial r} \left( r^2 \frac{\partial u}{\partial r} \right)
+\]
+
+By the section above we know that
+\(u(t,r)=G(t)\phi(r)\)
+
+Also we know that:
+\[
+\frac{\partial u}{\partial t} = G'(t)\phi(r)
+\]
+
+The right hand side is
+\[
+Rhs=\frac{G(t)}{2r^2}\left(2r\phi'(r)+r^2\phi''(r)\right)
+\]
+\[
+Rhs = G(t) \cdot\left(\frac{\phi'(r)}{r}+\frac{1}{2}\phi''(r)\right)
+\]
+
+
+Now substitute into the original PDE:
+\[
+ G'(t)\phi(r) = G(t) \cdot\left(\frac{\phi'(r)}{r}+\frac{1}{2}\phi''(r)\right)
+\]
+
+Divide both side by the \(G(t)\phi(r)\):
+\[
+\frac{G'(t)}{G(t)}=\frac{1}{\phi(r)}\left(\frac{\phi'(r)}{r}+\frac{1}{2}\phi''(r)\right)
+\]
+Once again we will set the two ODE to a constant \(-\lambda\):
+\[
+\frac{G'(t)}{G(t)}=\frac{1}{\phi(r)}\left(\frac{\phi'(r)}{r}+\frac{1}{2}\phi''(r)\right) = -\lambda
+\]
+For the time equation, it is the same for the 2D case from above:
+\[
+G(t) = C_1e^{-\lambda t}
+\]
+
+Solving the 3D Bessel Differential Equation:
+\begin{align*}
+\frac{1}{\phi(r)}\left( \frac{\phi'(r)}{r} + \frac{1}{2} \phi''(r) \right)
+&= -\lambda \\
+\frac{\phi'(r)}{r} + \frac{1}{2} \phi''(r)
+&= -\lambda \phi(r)\\
+2 \cdot \left( \frac{\phi'(r)}{r} + \frac{1}{2} \phi''(r) \right)
+&= -2\lambda \phi(r) \\
+\frac{2}{r} \phi'(r) + \phi''(r)
+&= -2\lambda \phi(r) \\
+\end{align*}
+\[
+\boxed{ \phi''(r) + \frac{2}{r} \phi'(r) + 2\lambda \phi(r) = 0 }
+\]
+
+Once again, Let \(\mu^2 = 2\lambda\), then the eqaution becomes:
+\[
+\phi''(r) + \frac{2}{r} \phi'(r) + \mu^2 = 0
+\]
+
+\subsection{Change of vairable to elmilnate the \(\frac{2}{r}\phi'(r)\)}:
+\begin{align*}
+\text{Let }:
+\varphi&=\frac{v(r)}{r}\\ \varphi'(r)&=\frac{v'(r)\cdot r- v(r)}{r^2}\\
+\varphi''(r) &=\frac{v'(r)}{r}-\frac{2v'(r)}{r^2}+\frac{2v(r)}{r^3}
+\end{align*}
+Plug then back to the spatial equation:
+\begin{align*}
+    \phi''(r)+\frac{2}{r}\phi'(r)&=
+    \left[
+    \frac{v'(r)}{r}-\frac{2v'(r)}{r^2}+\frac{2v(r)}{r^3}
+    \right]+
+    \left[
+    \frac{v'(r)\cdot r- v(r)}{r^2}
+    \right]\\
+    &= \frac{v''(r)}{r}\\
+    \Rightarrow \frac{v''(r)}{r}+\mu^2\frac{v(r)}{r}=0
+\end{align*}
+
+\begin{align*}
+    v(r)&=A\sin(\mu r)+B\cos(\mu r)\\
+        \\
+        &=\frac{A\sin(\mu r)+B\cos(\mu r)}{r}
+\end{align*}
+Then the solution for spatial equation:
+\boxed{\phi(r)=\frac{A\sin(\mu r)+B\cos(\mu r)}{r}}
+\subsection{Boundary Condition for the 3D Case}
+
+Applying the boundary condition \( u(t, R) = 0 \) to the separated solution \( u(t, r) = G(t)\phi(r) \), we obtain:
+\[
+u(t, R) = G(t)\phi(R) = 0
+\quad \Rightarrow \quad \phi(R) = 0.
+\]
+
+In the 3D case, the transformed radial equation reduces to:
+\[
+\phi''(r) + \frac{2}{r} \phi'(r) + \mu^2 \phi(r) = 0,
+\]
+which is the spherical Bessel differential equation of order zero. The general solution is:
+\[
+\phi(r) = A \cdot \frac{\sin(\mu r)}{r} + B \cdot \frac{\cos(\mu r)}{r}.
+\]
+
+To ensure regularity at \( r = 0 \), we set \( B = 0 \) (since \( \frac{\cos(\mu r)}{r} \) diverges as \( r \to 0 \)). Thus,
+\[
+\phi(r) = A \cdot \frac{\sin(\mu r)}{r}.
+\]
+
+This function is precisely the \textbf{spherical Bessel function of the first kind of order zero} denoted \( j_0(\mu r) \):
+\[
+j_0(\mu r) = \frac{\sin(\mu r)}{r}.
+\]
+
+Therefore, we can write:
+\[
+\phi(r) = A \cdot j_0(\mu r),
+\]
+and the boundary condition \( \phi(R) = 0 \) gives:
+\[
+\sin(\mu R) = 0
+\quad \Rightarrow \quad \mu R = n\pi, \quad n = 1, 2, 3, \dots
+\]
+which implies:
+\[
+\mu_n = \frac{n\pi}{R},
+\quad \text{and} \quad \lambda_n = \frac{\mu_n^2}{2} = \frac{n^2 \pi^2}{2R^2}.
+\]   
+\subsection{Final Solution For 3D Heat Equation}
+
+The general solution is:
+\[
+u_n(t, r) = A_n \cdot e^{-\lambda_n t} \cdot \frac{\sin\left( \frac{n\pi r}{R} \right)}{r}
+\]
+
+So the complete solution (for general initial conditions) is:
+\[
+u(t, r) = \sum_{n=1}^{\infty} A_n \cdot e^{ -\frac{n^2 \pi^2}{2R^2} t } \cdot \frac{ \sin\left( \frac{n\pi r}{R} \right) }{r}
+\]
+
+
+\subsection{Use Initial Condition to Find Coefficient}
+
+We are given the initial condition:
+\[
+u(0, r) = f(r) = 1
+\]
+
+From the separated solution:
+\[
+u(t, r) = \sum_{n=1}^\infty A_n \cdot e^{-\lambda_n t} \cdot \frac{\sin\left( \frac{n\pi r}{R} \right)}{r}
+\]
+
+At \( t = 0 \), this becomes:
+\[
+u(0, r) = \sum_{n=1}^\infty A_n \cdot \frac{\sin\left( \frac{n\pi r}{R} \right)}{r} = 1
+\]
+For any index integer m, independent of the dummy index n\\
+\[
+f(r)\sin\frac{m\pi r}{r}=\sum_{n=1}^{\infty}A_n\sin\frac{n\pi r}{r}\sin\frac{m\pi r}{r}
+\]
+\[
+\int_{0}^{R}f(r)\sin(\frac{m\pi r}{r})=\sum_{n=1}^{\infty}A_n\int_{0}^{R}\sin\frac{n\pi r}{r}\sin\frac{m\pi r}{r}
+\]
+\subsection{Orthogonality of Sine Functions (with weight \( r \))}
+
+We consider the inner product of two basis functions:
+\[
+\langle \phi_n, \phi_m \rangle = \int_0^R \phi_n(r) \cdot \phi_m(r) \cdot r^2 \, dr
+= \int_0^R \sin\left( \frac{n\pi r}{R} \right) \sin\left( \frac{m\pi r}{R} \right) \cdot r \, dr
+\]
+
+Using the identity:
+\[
+\sin A \sin B = \frac{1}{2} \left[ \cos(A - B) - \cos(A + B) \right],
+\]
+we write:
+\[
+\int_0^R \sin\left( \frac{n\pi r}{R} \right) \sin\left( \frac{m\pi r}{R} \right) \cdot r \, dr
+= \frac{1}{2} \left[ \int_0^R r \cos\left( \frac{(n - m)\pi r}{R} \right) dr - \int_0^R r \cos\left( \frac{(n + m)\pi r}{R} \right) dr \right]
+\]
+
+Each of these integrals evaluates to zero when \( n \ne m \), due to symmetry over the interval \( [0, R] \). Thus:
+\[
+\boxed{
+\int_0^R \sin\left( \frac{n\pi r}{R} \right) \sin\left( \frac{m\pi r}{R} \right) \cdot r \, dr = 0 \quad \text{for } n \ne m
+}
+\]
+
+---
+
+\subsection*{Norm of Each Basis Function (\( n = m \))}
+
+When \( n = m \), we compute:
+\[
+\int_0^R \sin^2\left( \frac{n\pi r}{R} \right) \cdot r \, dr
+\]
+
+Using the identity:
+\[
+\sin^2 x = \frac{1 - \cos(2x)}{2},
+\]
+we find:
+\[
+\int_0^R \sin^2\left( \frac{n\pi r}{R} \right) \cdot r \, dr = \frac{R^2}{2}
+\quad \text{(standard result)}
+\]
+
+So the norm is:
+\[
+\boxed{
+\int_0^R \left[ \frac{\sin\left( \frac{n\pi r}{R} \right)}{r} \right]^2 \cdot r^2 \, dr = \int_0^R \sin^2\left( \frac{n\pi r}{R} \right) \cdot r \, dr = \frac{R^2}{2}
+}
+\]
+
+---
+
+\subsection*{Numerator of \( A_n \)}
+
+We want to compute:
+\[
+\int_0^R f(r) \cdot \sin\left( \frac{n\pi r}{R} \right) \cdot r \, dr
+\quad \text{with } f(r) = 1
+\]
+
+We make the substitution:
+\[
+x = \frac{n\pi r}{R} \Rightarrow r = \frac{Rx}{n\pi}, \quad dr = \frac{R}{n\pi} dx
+\]
+
+When \( r = 0 \), \( x = 0 \); when \( r = R \), \( x = n\pi \)
+
+So the integral becomes:
+\[
+\int_0^R r \sin\left( \frac{n\pi r}{R} \right) \, dr
+= \frac{R^2}{n\pi} \int_0^{n\pi} x \sin(x) \, dx
+\]
+
+Now compute the integral \( \int x \sin x \, dx \) using integration by parts:
+
+Let \( u = x \), \( dv = \sin x \, dx \), then \( du = dx \), \( v = -\cos x \)
+
+\[
+\int x \sin x \, dx = -x \cos x + \int \cos x \, dx = -x \cos x + \sin x
+\]
+
+Evaluate from \( 0 \) to \( n\pi \):
+
+\[
+\int_0^{n\pi} x \sin x \, dx = \left[ -x \cos x + \sin x \right]_0^{n\pi}
+= -n\pi \cos(n\pi) + \sin(n\pi) - 0 = n\pi (-1)^{n+1}
+\]
+
+So the numerator becomes:
+\[
+\frac{R^2}{n\pi} \cdot n\pi (-1)^{n+1} = R^2 (-1)^{n+1}
+\]
+
+\[
+\boxed{
+\int_0^R r \sin\left( \frac{n\pi r}{R} \right) \, dr = R^2 (-1)^{n+1}
+}
+\]
+
+---
+
+\subsection{The General Solution for 3D heat Equation}
+
+Putting everything together:
+\[
+A_n = \frac{R^2 (-1)^{n+1}}{R^2 / 2} = 2(-1)^{n+1}
+\]
+
+So the full solution becomes:
+\[
+u(t, r) = \sum_{n=1}^{\infty} 2(-1)^{n+1} \cdot e^{- \frac{n^2 \pi^2}{2R^2} t} \cdot \frac{\sin\left( \frac{n\pi r}{R} \right)}{r}
+\]
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{Spherical Bessel Function.png}
+    \caption{Spherical Bessel Function of\(j_0\): $\frac{\sin\left(\frac{Z_n}{R} r\right)}{r}$}
+    \label{fig:l}
+\end{figure}
+
+\section{Extension to \(n\)-Dimensional Radial Case}
+
+We want to eliminate the first derivative from a radial differential equation using a substitution.
+
+\subsection*{Step 1: Change of Variable}
+
+Let
+\[
+\phi(r) = r^{-\frac{n-2}{2}} v(r)
+\]
+Define
+\[
+\nu = \frac{n - 2}{2}
+\]
+Then,
+\[
+\phi(r) = r^{-\nu} v(r)
+\]
+
+\subsection*{Step 2: Compute Derivatives}
+
+We compute the first and second derivatives of $\phi(r)$:
+\[
+\phi'(r) = -\nu r^{-\nu - 1} v(r) + r^{-\nu} v'(r)
+\]
+\[
+\phi''(r) = \nu(\nu + 1) r^{-\nu - 2} v(r) - 2\nu r^{-\nu - 1} v'(r) + r^{-\nu} v''(r)
+\]
+
+\subsection*{Step 3: Substitution into the Original Equation}
+
+Suppose the original radial equation for \(\phi(r)\) is
+\[
+\phi''(r) + \frac{n-1}{r} \phi'(r) + \mu^2 \phi(r) = 0.
+\]
+where \(n\) is the dimensions 
+Substitute
+\[
+\phi(r) = r^{-\nu} v(r), \quad \text{where } \nu = \frac{n-2}{2}.
+\]
+
+Using the derivatives computed in Step 2,\\
+Plugging these into the original equation:
+\[
+\begin{aligned}
+& \phi''(r) + \frac{n-1}{r} \phi'(r) + \mu^2 \phi(r) \\
+=\, & \left[ \nu(\nu+1) r^{-\nu - 2} v(r) - 2\nu r^{-\nu - 1} v'(r) + r^{-\nu} v''(r) \right] \\
+& + \frac{n-1}{r} \left[-\nu r^{-\nu - 1} v(r) + r^{-\nu} v'(r)\right] + \mu^2 r^{-\nu} v(r).
+\end{aligned}
+\]
+
+Simplify terms by factoring powers of \(r\):
+\[
+\begin{aligned}
+=\, & r^{-\nu - 2} \left[ \nu(\nu+1) v(r) - 2\nu r v'(r) + r^{2} v''(r) \right] \\
+& + r^{-\nu - 2} (n-1) \left[-\nu v(r) + r v'(r) \right] + \mu^2 r^{-\nu} v(r).
+\end{aligned}
+\]
+
+Group the terms:
+\[
+r^{-\nu - 2} \Big[ r^{2} v''(r) + (-2\nu + n - 1) r v'(r) + (\nu(\nu +1) - \nu(n-1)) v(r) \Big] + \mu^2 r^{-\nu} v(r) = 0.
+\]
+
+Since \(\nu = \frac{n-2}{2}\), evaluate coefficients:
+\[
+-2\nu + n - 1 = - (n - 2) + n - 1 = 1,
+\]
+\[
+\nu(\nu +1) - \nu(n-1) = \nu^2 + \nu - \nu n + \nu = \nu^2 - \nu (n-2) = \frac{(n-2)^2}{4} - \frac{n-2}{2}(n-2) = -\frac{(n-2)(n-4)}{4}.
+\]
+
+Therefore, the equation reduces to:
+\[
+r^{-\nu - 2} \left[ r^{2} v''(r) + r v'(r) - \frac{(n-2)(n-4)}{4} v(r) \right] + \mu^{2} r^{-\nu} v(r) = 0.
+\]
+
+Multiply through by \(r^{\nu + 2}\):
+\[
+r^{2} v''(r) + r v'(r) + \left( \mu^{2} r^{2} - \frac{(n-2)(n-4)}{4} \right) v(r) = 0,
+\]
+which can be written as
+\[
+v''(r) + \frac{1}{r} v'(r) + \left( \mu^{2} - \frac{(n-2)(n-4)}{4 r^{2}} \right) v(r) = 0.
+\]
+
+This is the Bessel-type equation satisfied by \(v(r)\).
+
+
+
+\subsection*{Step 4: Bessel-Type Form}
+
+This equation is a Bessel-type differential equation. Recall the standard form of the Bessel equation:
+\[
+x^2 y'' + x y' + (x^2 - \nu^2) y = 0
+\]
+
+This can be rewritten as:
+\[
+y'' + \frac{1}{x} y' + \left(1 - \frac{\nu^2}{x^2} \right)y = 0
+\]
+
+Our transformed equation resembles this form, so the solution is:
+\[
+v(r) = J_\nu(\mu r)
+\]
+
+\subsection*{Step 5: Final Solution for $\phi$}
+
+Thus, the solution in terms of the original function $\phi(r)$ is:
+\[
+\phi(r) = r^{-\nu} J_\nu(\mu r)
+\]
+\subsection{Connection to the 3D Radial Heat Equation}
+
+When \(n = 3\), we have \(\nu = \frac{3 - 2}{2} = \frac{1}{2}\), and the coefficient of the potential term becomes:
+\[
+\frac{(n - 2)(n - 4)}{4} = \frac{(1)(-1)}{4} = -\frac{1}{4}.
+\]
+
+Thus, the Bessel-type equation reduces to:
+\[
+v''(r) + \frac{1}{r} v'(r) + \left( \mu^2 + \frac{1}{4 r^2} \right) v(r) = 0.
+\]
+
+However, in the time-dependent heat equation in three-dimensional spherical coordinates, we previously encountered the equation:
+\[
+\frac{\partial u}{\partial t} = \alpha \left( \frac{\partial^2 u}{\partial r^2} + \frac{2}{r} \frac{\partial u}{\partial r} \right),
+\]
+which, after applying separation of variables \(u(r,t) = \phi(r) T(t)\), leads to the radial ODE:
+\[
+\phi''(r) + \frac{2}{r} \phi'(r) + \lambda \phi(r) = 0,
+\]
+with solutions involving spherical Bessel functions when \(\phi(r)\) is assumed to be radial.
+
+By applying the change of variable \(\phi(r) = \frac{v(r)}{r}\), we obtained:
+\[
+v''(r) + \left( \lambda - \frac{2}{r^2} \right) v(r) = 0,
+\]
+This shows that the classical 3D spherical case is a special case of the general \(n\)-dimensional radial problem, where the solution involves the Bessel function of order \(\nu = \frac{1}{2}\). In this case, the regular Bessel function \(J_{1/2}(\mu r)\) simplifies to a sine function:
+\[
+J_{1/2}(\mu r) = \sqrt{\frac{2}{\pi \mu r}} \sin(\mu r),
+\]
+so the radial solution becomes:
+\[
+\phi(r) = A \cdot \frac{\sin(\mu r)}{r},
+\]
+which is the spherical Bessel function of the first kind of order zero:
+\[
+j_0(\mu r) = \frac{\sin(\mu r)}{\mu r}.
+\]
+
+
+\section{Brownian Motion for 2D}
+Recall the CDF:
+\begin{equation*}\label{eqn:cdf_B_T}
+u(T,r,R,\rho)= \mathbb{P}\left(\max_{t\in[0,T]}|B_t| < R \text{ and } |B_T| \le  \rho \Big||B_0|=r\right)
+\end{equation*}
+\textbf{Step 1: Expression for \(A_n\)}
+
+\[
+A_n = \frac{
+\int_0^R r \cdot u(0, r) \cdot J_0\left( \frac{Z_n}{R} r \right) \, dr
+}{
+\int_0^R r \cdot \left[J_0\left( \frac{Z_n}{R} r \right)\right]^2 \, dr
+}.
+\]
+
+Given the initial condition  \[
+u(0, r) = f(r) = 
+\begin{cases}
+    1& r\le \rho\\
+    0&r>\rho
+\end{cases}
+\]this becomes
+
+\[
+A_n = \frac{
+\int_0^\rho r \cdot J_0\left( \frac{Z_n}{R} r \right) \, dr
+}{
+\int_0^R r \cdot \left[J_0\left( \frac{Z_n}{R} r \right)\right]^2 \, dr
+}.
+\]
+\vspace{0.5em}
+\textbf{Step 2: Use the known normalization result}
+\[
+\int_0^R r \left[J_0\left(\frac{Z_n}{R} r \right)\right]^2 dr = \frac{R^2}{2} \left[J_1(Z_n)\right]^2.
+\]
+
+Therefore,
+
+\[
+A_n = \frac{2}{R^2 [J_1(Z_n)]^2} \int_0^\rho r \, J_0\left( \frac{Z_n}{R} r \right) dr.
+\]
+\vspace{0.5em}
+\textbf{Step 3: Evaluate the integral}
+
+Recall the formula  (pg.46)
+
+\[
+\int x J_0(a x) dx = \frac{x}{a} J_1(a x) + C.
+\]
+
+\textbf{let} \(a=\frac{Z_n}{R}\) , \(x=\rho\)\\
+
+Thus,
+
+\[
+\int_0^\rho r J_0\left(\frac{Z_n}{R} r\right) dr = \left. \frac{r R}{Z_n} J_1\left( \frac{Z_n}{R} r \right) \right|_0^\rho = \frac{\rho R}{Z_n} J_1\left( \frac{Z_n}{R} \rho \right).
+\]
+\vspace{0.5em}
+\textbf{Step 4: Final formula for \(A_n\)}
+
+Substituting the integral back:
+
+\[
+A_n = \frac{2 \rho}{R Z_n \left[J_1(Z_n)\right]^2} \, J_1\left( \frac{Z_n}{R} \rho \right).
+\]
+\textbf{Step 5: Final Solution for the CDF}
+\[
+u(T,r,R,\rho) = \sum_{n=1}^\infty \frac{2 \rho}{R Z_n [J_1(Z_n)]^2} J_1\left(\frac{Z_n}{R}\rho\right) J_0\left(\frac{Z_n}{R}r\right) e^{-\frac{Z_n^2}{2 R^2} T}
+\]
+
+\section{Brownian Motion for 3D}
+
+The solution to the radially symmetric heat equation (in 3D with Dirichlet boundary at \( r = R \)) has the form:
+\[
+u(t, r) = \sum_{n=1}^{\infty} A_n \cdot e^{-\lambda_n t} \cdot \frac{\sin\left( \frac{n\pi r}{R} \right)}{r}
+\]
+
+At \( t = 0 \), this gives:
+\[
+f(r) = u(0, r) = \sum_{n=1}^\infty A_n \cdot \frac{\sin\left( \frac{n\pi r}{R} \right)}{r}
+\]
+
+Multiplying both sides by \( r \cdot \sin\left( \frac{m\pi r}{R} \right) \) and integrating over \( [0, R] \):
+\[
+\int_0^R f(r) \cdot r \cdot \sin\left( \frac{m\pi r}{R} \right) dr = A_m \cdot \int_0^R \sin^2\left( \frac{m\pi r}{R} \right) \cdot r \, dr
+\]
+
+\subsection{Denominator (Norm)}
+
+We recall the standard result:
+\[
+\int_0^R \sin^2\left( \frac{n\pi r}{R} \right) r \, dr = \frac{R^2}{2}
+\]
+
+\subsection{Numerator}
+
+We compute the numerator using the definition of \( f(r) \):
+\[
+\int_0^R f(r) \cdot r \cdot \sin\left( \frac{n\pi r}{R} \right) dr
+= \int_0^{\rho} r \cdot \sin\left( \frac{n\pi r}{R} \right) dr
+\]
+
+Make the substitution \( x = \frac{n\pi r}{R} \), so that:
+\[
+r = \frac{Rx}{n\pi}, \quad dr = \frac{R}{n\pi} dx
+\]
+When \( r = 0 \), \( x = 0 \), and when \( 0 \le r \le \rho \), \( x = \frac{n\pi r}{R} \)
+
+Then:
+\[
+\int_0^{\rho} r \cdot \sin\left( \frac{n\pi r}{R} \right) dr
+= \frac{R^2}{(n\pi)^2} \int_0^{\frac{n\pi \rho}{R}} x \cdot \sin(x) dx
+\]
+
+Using integration by parts: {\color{red}check it with it that use ax}
+\[
+\int x \sin x \, dx = -x \cos x + \sin x + C
+\]
+
+So:
+\[
+\int_0^{\frac{n\pi \rho}{R}} x \cdot \sin(x) dx = 
+-\frac{n\pi \rho}{R} \cos\left( \frac{n\pi \rho}{R} \right)
++ \sin\left( \frac{n\pi \rho}{R} \right)
+\]
+
+Hence:
+\[
+\int_0^{\rho} r \cdot \sin\left( \frac{n\pi r}{R} \right) dr
+= \frac{R^2}{(n\pi)^2} \left[
+-\frac{n\pi \rho}{R} \cos\left( \frac{n\pi \rho}{R} \right)
++ \sin\left( \frac{n\pi \rho}{R} \right)
+\right]
+\]
+
+\subsection{Final Expression for \( A_n \)}
+
+Dividing by the norm \( \frac{R^2}{2} \), we get:
+\[
+A_n = \frac{2}{R^2} \cdot \frac{R^2}{(n\pi)^2}
+\left[
+-\frac{n\pi \rho}{R} \cos\left( \frac{n\pi \rho}{R} \right)
++ \sin\left( \frac{n\pi \rho}{R} \right)
+\right]
+\]
+
+Simplifying:
+\[
+\boxed{
+A_n = \frac{2}{(n\pi)^2} \left[
+-\frac{n\pi \rho}{R} \cos\left( \frac{n\pi \rho}{R} \right)
++ \sin\left( \frac{n\pi \rho}{R} \right)
+\right]
+}
+\]
+
+\begin{appendix}
+    \section{Generating sample paths using cdf}
+    The cdf of a random variable $X$ is defined by $F_X(x)=\mathbb{P}(X\le x)$. If a cdf of a random variable $X$ is given, the inverse transform sampling can generate a sample of the random variable $X$. Inverse transform sampling 
+\begin{algorithm}
+\caption{Inverse transform sampling}
+\label{alg:its}
+\hspace*{\algorithmicindent}\textbf{Input:} $F_X(x)$ the cdf  of a function \\
+\hspace*{\algorithmicindent}\textbf{Output:} A sample of random variable $X$
+\begin{algorithmic}[1]
+\Procedure{Inversion}{}
+\State Find and save the inverse of cdf, $F_X^{-1}:(0,1)\to \mathbb{R}$ 
+\EndProcedure
+\Procedure{Sampling}{}
+\State Generate a random number $u$ uniformly on $(0,1)$
+\State \Return $F_X^{-1}(u)$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+    
+    Recall from \eqref{eqn:cdf_B_T} that the cdf of $|B_T|$ is given by 
+\[
+u(T,0,R,\rho)= \mathbb{P}\left(\max_{t\in[0,T]}|B_t| < R \text{ and } |B_T| \tikzmark{cdf}\le  \rho \Big||B_0|=0\right)
+\]
+Fixing $T$ and $R$, we evaluate $F(\rho):=u(T,0,\rho)$ using Bessel functions. Then, we evaluate the inverse $F^{-1}(u)$. This inverse function needs to be saved for many different values of $u$, $T$, and $R$ in a format that can be queried upon request in lightspeed. Using samples of uniform random variable, we can generate sample of $B_T$.
+\end{appendix}
+
+\section{CDF of $B_T$}
+\begin{lstlisting}{style = mypython}
+import numpy as np
+from scipy.special import j0, j1, jn_zeros
+from scipy.interpolate import interp1d
+from scipy.optimize import brentq
+import matplotlib.pyplot as plt
+import random
+
+def compute_cdf(T, R, rho_vals, N_terms=50):
+    """
+    Compute CDF F(rho) = P(|B_T| <= rho | survive inside disk of radius R)
+    using the truncated series expansion with N_terms.
+    
+    Parameters:
+      T       : float, time horizon
+      R       : float, disk radius
+      rho_vals: array of floats, points where to compute CDF (0 to R)
+      N_terms : int, number of terms in series expansion
+    
+    Returns:
+      cdf_vals: array of floats, CDF values at rho_vals
+    """
+    alpha = jn_zeros(0, N_terms)  # First N_terms zeros of J0
+    cdf_vals = np.zeros_like(rho_vals)
+    r = 0.0  # Use the maximum rho for normalization
+
+    for n in range(N_terms):
+        an = alpha[n]
+        # Precompute constants
+        denom = R * an * (j1(an)**2)
+        for i, rho in enumerate(rho_vals):
+            if rho == 0:
+                # J1(0) = 0, so term = 0 for rho=0
+                term = 0
+            else:
+                term = (2 * rho / denom) * j1(an * rho / R) * j0(an * r / R) * np.exp(- (an**2) * T / (2 * R**2))
+            cdf_vals[i] += term
+            
+    # Ensure CDF starts at 0 and ends at 1 (numerical)
+    cdf_vals = np.clip(cdf_vals, 0, 1)
+    return cdf_vals
+
+def generate_sample_from_cdf(T, R, N_terms=50, grid_points=1000):
+    """
+    Generate a single sample from the distribution of |B_T| conditioned to stay inside disk radius R.
+    """
+    # Create fine grid of rho
+    rho_vals = np.linspace(0, R, grid_points)
+    cdf_vals = compute_cdf(T, R, rho_vals, N_terms)
+
+    # Create interpolation function of the CDF
+    cdf_interp = interp1d(rho_vals, cdf_vals, kind='linear', bounds_error=False, fill_value=(0,1))
+
+    # Inverse transform sampling:
+    u = random.uniform(0, 1)
+
+     # Safety check: handle edges
+    if u <= cdf_vals[0]:
+        return rho_vals[0]
+    elif u >= cdf_vals[-1]:
+        return rho_vals[-1]
+    
+    # Define function to find root for inversion: cdf(rho) - u = 0
+    def root_func(rho):
+        return cdf_interp(rho) - u
+
+    # Find root in [0, R] using Brent's method
+    # find p such thatf(p)=u
+    # f(a) and f(b) must have opposite signs
+    sample_rho = brentq(root_func, rho_vals[0], rho_vals[-1])
+    # Return the sampled radial distance
+    return sample_rho
+
+# Example usage:
+if __name__ == "__main__":
+    T = 1.0  # Time horizon
+    R = 1.0  # Disk radius
+    
+    # Generate 5 samples and print
+    for _ in range(5):
+        sample = generate_sample_from_cdf(T, R)
+        print(f"Sampled |B_T| = {sample:.4f}")
+
+    # Optional: plot the CDF for visualization
+    rho_vals = np.linspace(0, R, 500)
+    cdf_vals = compute_cdf(T, R, rho_vals)
+    plt.plot(rho_vals, cdf_vals, label='CDF of |B_T| conditioned on survival')
+    plt.xlabel(r'$\rho$')
+    plt.ylabel(r'CDF $F(\rho)$')
+    plt.title(r'CDF of radial distance $|B_T|$ in disk of radius $R$')
+    plt.grid(True)
+    plt.legend()
+    plt.show()
+
+
+
+\end{lstlisting}
+\end{document}
+
+
+
+
+
+\end{document}
