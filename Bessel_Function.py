@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.special import jv
 
+'''This plots bessel functions'''
+
 # Creates an array of 1000 evenly spaced values from 0 to 20.
 x = np.linspace(0, 20, 1000)
 
