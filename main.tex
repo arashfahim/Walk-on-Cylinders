@@ -10,16 +10,19 @@
 \usepackage{xcolor}
 \lstdefinestyle{mypython}{
     language=Python,
-    basicstyle=\ttfamily\small,
+   backgroundcolor=\color{white},   
+    basicstyle=\ttfamily\footnotesize,
     keywordstyle=\color{blue}\bfseries,
-    commentstyle=\color{gray},
-    stringstyle=\color{green!50!black},
+    stringstyle=\color{orange},
+    commentstyle=\color{green!50!black}\itshape,
     numberstyle=\tiny\color{gray},
     numbers=left,
     stepnumber=1,
+    numbersep=5pt,
     showstringspaces=false,
     breaklines=true,
-    frame=single
+    frame=single,
+    rulecolor=\color{gray},
 }
 
 \usepackage{algorithm}
@@ -308,7 +311,7 @@ e^{- \frac{1}{2} \left( \frac{Z_n}{R} \right)^2 t} \cdot J_0\left( \frac{Z_n}{R}
     \centering
     \includegraphics[width=0.5\linewidth]{Cylindrical Bessel Equation.png}
     \caption{Bessel Functions $J_0\left(\frac{{Z_{{{n}}}}}{{R}} r\right)$ on $[0,1]$}
-    \label{fig:enter-label}
+    \label{fig:enter-label-2}
 \end{figure}
 {\color{red}Arash: find out how to evaluate roots of Bessel functions in Python.}
 \newpage
@@ -541,12 +544,12 @@ f(r)\sin\frac{m\pi r}{r}=\sum_{n=1}^{\infty}A_n\sin\frac{n\pi r}{r}\sin\frac{m\p
 \[
 \int_{0}^{R}f(r)\sin(\frac{m\pi r}{r})=\sum_{n=1}^{\infty}A_n\int_{0}^{R}\sin\frac{n\pi r}{r}\sin\frac{m\pi r}{r}
 \]
-\subsection{Orthogonality of Sine Functions (with weight \( r \))}
+\subsection{Orthogonality of Sine Functions (with weight \( r ^2\))}
 
 We consider the inner product of two basis functions:
 \[
 \langle \phi_n, \phi_m \rangle = \int_0^R \phi_n(r) \cdot \phi_m(r) \cdot r^2 \, dr
-= \int_0^R \sin\left( \frac{n\pi r}{R} \right) \sin\left( \frac{m\pi r}{R} \right) \cdot r \, dr
+= \int_0^R r^2\cdot\sin\left( \frac{n\pi r}{R} \right) \sin\left( \frac{m\pi r}{R} \right) dr
 \]
 
 Using the identity:
@@ -555,14 +558,14 @@ Using the identity:
 \]
 we write:
 \[
-\int_0^R \sin\left( \frac{n\pi r}{R} \right) \sin\left( \frac{m\pi r}{R} \right) \cdot r \, dr
-= \frac{1}{2} \left[ \int_0^R r \cos\left( \frac{(n - m)\pi r}{R} \right) dr - \int_0^R r \cos\left( \frac{(n + m)\pi r}{R} \right) dr \right]
+\int_0^R \sin\left( \frac{n\pi r}{R} \right) \sin\left( \frac{m\pi r}{R} \right) r^2\cdot dr
+= \frac{1}{2} \left[ \int_0^R \cos\left( \frac{(n - m)\pi r}{R} \right) r^2\cdot dr - \int_0^R r \cos\left( \frac{(n + m)\pi r}{R} \right) r^2\cdot dr \right]
 \]
 
 Each of these integrals evaluates to zero when \( n \ne m \), due to symmetry over the interval \( [0, R] \). Thus:
 \[
 \boxed{
-\int_0^R \sin\left( \frac{n\pi r}{R} \right) \sin\left( \frac{m\pi r}{R} \right) \cdot r \, dr = 0 \quad \text{for } n \ne m
+\int_0^R \sin\left( \frac{n\pi r}{R} \right) \sin\left( \frac{m\pi r}{R} \right)r^2 \cdot  dr = 0 \quad \text{for } n \ne m
 }
 \]
 
@@ -572,7 +575,7 @@ Each of these integrals evaluates to zero when \( n \ne m \), due to symmetry ov
 
 When \( n = m \), we compute:
 \[
-\int_0^R \sin^2\left( \frac{n\pi r}{R} \right) \cdot r \, dr
+\int_0^R r \cdot\sin^2\left( \frac{n\pi r}{R} \right)dr
 \]
 
 Using the identity:
@@ -581,24 +584,23 @@ Using the identity:
 \]
 we find:
 \[
-\int_0^R \sin^2\left( \frac{n\pi r}{R} \right) \cdot r \, dr = \frac{R^2}{2}
+\int_0^R r\cdot\sin^2\left( \frac{n\pi r}{R} \right)  dr = \frac{R^2}{2}
 \quad \text{(standard result)}
 \]
 
 So the norm is:
 \[
 \boxed{
-\int_0^R \left[ \frac{\sin\left( \frac{n\pi r}{R} \right)}{r} \right]^2 \cdot r^2 \, dr = \int_0^R \sin^2\left( \frac{n\pi r}{R} \right) \cdot r \, dr = \frac{R^2}{2}
+\int_0^R \left[ \frac{\sin\left( \frac{n\pi r}{R} \right)}{r} \right]^2 r\cdot dr = \int_0^R r\cdot\sin^2\left( \frac{n\pi r}{R} \right) dr = \frac{R^2}{2}
 }
 \]
 
----
 
 \subsection*{Numerator of \( A_n \)}
 
 We want to compute:
 \[
-\int_0^R f(r) \cdot \sin\left( \frac{n\pi r}{R} \right) \cdot r \, dr
+\int_0^R f(r) \cdot \sin\left( \frac{n\pi r}{R} \right) \cdot r^2 \, dr
 \quad \text{with } f(r) = 1
 \]
 
@@ -611,7 +613,7 @@ When \( r = 0 \), \( x = 0 \); when \( r = R \), \( x = n\pi \)
 
 So the integral becomes:
 \[
-\int_0^R r \sin\left( \frac{n\pi r}{R} \right) \, dr
+\int_0^R r \cdot\sin\left( \frac{n\pi r}{R} \right) \, dr
 = \frac{R^2}{n\pi} \int_0^{n\pi} x \sin(x) \, dx
 \]
 
@@ -647,7 +649,7 @@ So the numerator becomes:
 
 Putting everything together:
 \[
-A_n = \frac{R^2 (-1)^{n+1}}{R^2 / 2} = 2(-1)^{n+1}
+A_n = \frac{R^2 (-1)^{n+1}}{R ^2/ 2} = 2(-1)^{n+1}
 \]
 
 So the full solution becomes:
@@ -880,6 +882,7 @@ Substituting the integral back:
 A_n = \frac{2 \rho}{R Z_n \left[J_1(Z_n)\right]^2} \, J_1\left( \frac{Z_n}{R} \rho \right).
 \]
 \textbf{Step 5: Final Solution for the CDF}
+
 \[
 u(T,r,R,\rho) = \sum_{n=1}^\infty \frac{2 \rho}{R Z_n [J_1(Z_n)]^2} J_1\left(\frac{Z_n}{R}\rho\right) J_0\left(\frac{Z_n}{R}r\right) e^{-\frac{Z_n^2}{2 R^2} T}
 \]
@@ -898,22 +901,22 @@ f(r) = u(0, r) = \sum_{n=1}^\infty A_n \cdot \frac{\sin\left( \frac{n\pi r}{R} \
 
 Multiplying both sides by \( r \cdot \sin\left( \frac{m\pi r}{R} \right) \) and integrating over \( [0, R] \):
 \[
-\int_0^R f(r) \cdot r \cdot \sin\left( \frac{m\pi r}{R} \right) dr = A_m \cdot \int_0^R \sin^2\left( \frac{m\pi r}{R} \right) \cdot r \, dr
+\int_0^R f(r) \cdot r \cdot \sin\left( \frac{m\pi r}{R} \right) dr = A_m \cdot \int_0^R r\cdot\sin^2\left( \frac{m\pi r}{R} \right)  dr
 \]
 
 \subsection{Denominator (Norm)}
 
 We recall the standard result:
 \[
-\int_0^R \sin^2\left( \frac{n\pi r}{R} \right) r \, dr = \frac{R^2}{2}
+\int_0^R r\cdot\sin^2\left( \frac{n\pi r}{R} \right) dr = \frac{R^2}{2}
 \]
 
 \subsection{Numerator}
 
 We compute the numerator using the definition of \( f(r) \):
 \[
-\int_0^R f(r) \cdot r \cdot \sin\left( \frac{n\pi r}{R} \right) dr
-= \int_0^{\rho} r \cdot \sin\left( \frac{n\pi r}{R} \right) dr
+\int_0^R f(r)\cdot r\cdot \sin\left( \frac{n\pi r}{R} \right) dr
+= \int_0^{\rho} r\cdot \sin\left( \frac{n\pi r}{R} \right) dr
 \]
 
 Make the substitution \( x = \frac{n\pi r}{R} \), so that:
@@ -924,51 +927,156 @@ When \( r = 0 \), \( x = 0 \), and when \( 0 \le r \le \rho \), \( x = \frac{n\p
 
 Then:
 \[
-\int_0^{\rho} r \cdot \sin\left( \frac{n\pi r}{R} \right) dr
+\int_0^{\rho} r\cdot \sin\left( \frac{n\pi r}{R} \right) dr
 = \frac{R^2}{(n\pi)^2} \int_0^{\frac{n\pi \rho}{R}} x \cdot \sin(x) dx
 \]
 
 Using integration by parts: {\color{red}check it with it that use ax}
 \[
-\int x \sin x \, dx = -x \cos x + \sin x + C
+\int x \sin\left(a x\right) \, dx = -\frac{x}{a}\cos \left(ax\right) + \frac{1}{a^2}\sin\left(a x\right) + C
 \]
 
 So:
-\[
-\int_0^{\frac{n\pi \rho}{R}} x \cdot \sin(x) dx = 
--\frac{n\pi \rho}{R} \cos\left( \frac{n\pi \rho}{R} \right)
-+ \sin\left( \frac{n\pi \rho}{R} \right)
-\]
 
-Hence:
 \[
 \int_0^{\rho} r \cdot \sin\left( \frac{n\pi r}{R} \right) dr
-= \frac{R^2}{(n\pi)^2} \left[
--\frac{n\pi \rho}{R} \cos\left( \frac{n\pi \rho}{R} \right)
-+ \sin\left( \frac{n\pi \rho}{R} \right)
-\right]
+= 
+-\frac{rR}{n\pi} \cos\left( \frac{n\pi r}{R} \right)
++ \frac{R^2}{(n\pi)^2}\sin\left( \frac{n\pi r}{R} \right)
+\]
+Then:
+\[
+\int_0^{\rho} r\cdot \sin\left( \frac{n\pi r}{R} \right) dr
+= \left[
+-\frac{rR}{n\pi} \cos\left( \frac{n\pi r}{R} \right) + \frac{R^2}{(n\pi)^2} \sin\left( \frac{n\pi r}{R} \right)
+\right]_0^\rho
 \]
 
+\[
+= -\frac{\rho R}{n\pi} \cos\left( \frac{n\pi \rho}{R} \right) + \frac{R^2}{(n\pi)^2} \sin\left( \frac{n\pi \rho}{R} \right)
+\]
 \subsection{Final Expression for \( A_n \)}
 
 Dividing by the norm \( \frac{R^2}{2} \), we get:
 \[
-A_n = \frac{2}{R^2} \cdot \frac{R^2}{(n\pi)^2}
+A_n = \frac{2}{R^2} 
 \left[
--\frac{n\pi \rho}{R} \cos\left( \frac{n\pi \rho}{R} \right)
-+ \sin\left( \frac{n\pi \rho}{R} \right)
+-\frac{\rho R}{n\pi} \cos\left( \frac{n\pi \rho}{R} \right)
++ \frac{R^2}{(n\pi)^2}\sin\left( \frac{n\pi \rho}{R} \right)
 \right]
 \]
 
-Simplifying:
-\[
-\boxed{
-A_n = \frac{2}{(n\pi)^2} \left[
--\frac{n\pi \rho}{R} \cos\left( \frac{n\pi \rho}{R} \right)
-+ \sin\left( \frac{n\pi \rho}{R} \right)
-\right]
-}
-\]
+\newpage
+\section{CDF of $B_T$}
+\begin{lstlisting}[style = mypython]
+# Brownian Motion in a Disk: CDF and Sampling
+# This code computes the cumulative distribution function (CDF) of the radial distance
+# of a Brownian motion conditioned to stay within a disk of radius R at time T.
+# It uses a series expansion based on Bessel functions and performs inverse transform sampling
+# to generate samples from this distribution.
+
+import numpy as np
+from scipy.special import j0, j1, jn_zeros
+from scipy.interpolate import interp1d
+from scipy.optimize import brentq
+import matplotlib.pyplot as plt
+import random
+
+def compute_cdf(T, R, rho_vals, N_terms=100):
+    """
+    Compute CDF F(rho) = P(|B_T| <= rho | survive inside disk of radius R)
+    using the truncated series expansion with N_terms.
+    Parameters:
+      T       : float, time horizon
+      R       : float, disk radius
+      rho_vals: array of floats, points where to compute CDF (0 to R)
+      N_terms : int, number of terms in series expansion
+    Returns:
+      cdf_vals: array of floats, CDF values at rho_vals
+    """
+    alpha = jn_zeros(0, N_terms)  # First N_terms zeros of J0
+    cdf_vals = np.zeros_like(rho_vals)
+    r = 0.0  # Use the maximum rho for normalization
+    for n in range(N_terms):
+        Zn = alpha[n]
+        # Precompute constants
+        denom = R * Zn * (j1(Zn )**2)
+        for i, rho in enumerate(rho_vals):
+            if rho == 0:
+                term = 0
+            else:
+                term = (2 * rho / denom) * j1(Zn * rho / R) * j0(Zn * r / R) * np.exp(- (Zn**2) * T / (2 * R**2))
+            cdf_vals[i] += term
+            
+    # Ensure CDF starts at 0 and ends at 1 (numerical)
+    if len(cdf_vals) > 0:
+        cdf_vals -= np.min(cdf_vals)  # Normalize to start at 0
+        cdf_vals /= np.max(cdf_vals)  # Normalize to end at 1
+    return cdf_vals
+
+def generate_sample_from_cdf(T, R, N_terms=50, grid_points=1000):
+    """
+    Generate a single sample from the distribution of |B_T| conditioned to stay inside disk radius R.
+    """
+    # Create fine grid of rho
+    rho_grid = np.linspace(0, R, grid_points)
+    cdf_vals = compute_cdf(T, R, rho_grid, N_terms)
+
+    # Create interpolation function of the CDF
+    cdf_interp = interp1d(rho_grid, cdf_vals, kind='linear', bounds_error=False, fill_value=(0,1))
+
+    # Inverse transform sampling:
+    u = random.uniform(0, 1)
+
+     # Safety check: handle edges
+    eps = 1e-10
+    if u <= cdf_vals[0] + eps:
+        return rho_grid[0]
+    elif u >= cdf_vals[-1] - eps:
+        return rho_grid[-1] - eps  # stay within interpolation range
+
+    
+    # Define function to find root for inversion: cdf(rho) - u = 0
+    def root_func(rho):
+        return cdf_interp(rho) - u
+
+    # Find root in [0, R] using Brent's method
+    # find p such thatf(p)=u
+    # f(a) and f(b) must have opposite signs
+    sample_rho = brentq(root_func, rho_grid[0], rho_grid[-1])
+    # Return the sampled radial distance
+    return sample_rho
+
+# Example usage:
+if __name__ == "__main__":
+    T = 1.0
+    R = 1.0
+    print("Sampled values of |B_T|:")
+    for _ in range(5):
+        sample = generate_sample_from_cdf(T, R)
+        print(f"{sample:.4f}")
+
+    # Optional: plot the CDF for visualization
+    rho_x = np.linspace(0, R, 500)
+    cdf_y = compute_cdf(T, R, rho_x)
+    plt.plot(rho_x, cdf_y, label='CDF of |B_T| conditioned on survival')
+    plt.xlabel(r'$\rho$')
+    plt.ylabel(r'CDF $F(\rho)$')
+    plt.title(r'CDF of radial distance $|B_T|$ in disk of radius $R$')
+    plt.grid(True)
+    plt.legend()
+    plt.show()
+
+    """
+    Output:
+    Sampled values of |$B_T$|:
+    0.4695
+    0.2471
+    0.4801
+    0.5827
+    0.5310
+    """
+\end{lstlisting}
 
 \begin{appendix}
     \section{Generating sample paths using cdf}
@@ -996,109 +1104,6 @@ u(T,0,R,\rho)= \mathbb{P}\left(\max_{t\in[0,T]}|B_t| < R \text{ and } |B_T| \tik
 \]
 Fixing $T$ and $R$, we evaluate $F(\rho):=u(T,0,\rho)$ using Bessel functions. Then, we evaluate the inverse $F^{-1}(u)$. This inverse function needs to be saved for many different values of $u$, $T$, and $R$ in a format that can be queried upon request in lightspeed. Using samples of uniform random variable, we can generate sample of $B_T$.
 \end{appendix}
-
-\section{CDF of $B_T$}
-\begin{lstlisting}{style = mypython}
-import numpy as np
-from scipy.special import j0, j1, jn_zeros
-from scipy.interpolate import interp1d
-from scipy.optimize import brentq
-import matplotlib.pyplot as plt
-import random
-
-def compute_cdf(T, R, rho_vals, N_terms=50):
-    """
-    Compute CDF F(rho) = P(|B_T| <= rho | survive inside disk of radius R)
-    using the truncated series expansion with N_terms.
-    
-    Parameters:
-      T       : float, time horizon
-      R       : float, disk radius
-      rho_vals: array of floats, points where to compute CDF (0 to R)
-      N_terms : int, number of terms in series expansion
-    
-    Returns:
-      cdf_vals: array of floats, CDF values at rho_vals
-    """
-    alpha = jn_zeros(0, N_terms)  # First N_terms zeros of J0
-    cdf_vals = np.zeros_like(rho_vals)
-    r = 0.0  # Use the maximum rho for normalization
-
-    for n in range(N_terms):
-        an = alpha[n]
-        # Precompute constants
-        denom = R * an * (j1(an)**2)
-        for i, rho in enumerate(rho_vals):
-            if rho == 0:
-                # J1(0) = 0, so term = 0 for rho=0
-                term = 0
-            else:
-                term = (2 * rho / denom) * j1(an * rho / R) * j0(an * r / R) * np.exp(- (an**2) * T / (2 * R**2))
-            cdf_vals[i] += term
-            
-    # Ensure CDF starts at 0 and ends at 1 (numerical)
-    cdf_vals = np.clip(cdf_vals, 0, 1)
-    return cdf_vals
-
-def generate_sample_from_cdf(T, R, N_terms=50, grid_points=1000):
-    """
-    Generate a single sample from the distribution of |B_T| conditioned to stay inside disk radius R.
-    """
-    # Create fine grid of rho
-    rho_vals = np.linspace(0, R, grid_points)
-    cdf_vals = compute_cdf(T, R, rho_vals, N_terms)
-
-    # Create interpolation function of the CDF
-    cdf_interp = interp1d(rho_vals, cdf_vals, kind='linear', bounds_error=False, fill_value=(0,1))
-
-    # Inverse transform sampling:
-    u = random.uniform(0, 1)
-
-     # Safety check: handle edges
-    if u <= cdf_vals[0]:
-        return rho_vals[0]
-    elif u >= cdf_vals[-1]:
-        return rho_vals[-1]
-    
-    # Define function to find root for inversion: cdf(rho) - u = 0
-    def root_func(rho):
-        return cdf_interp(rho) - u
-
-    # Find root in [0, R] using Brent's method
-    # find p such thatf(p)=u
-    # f(a) and f(b) must have opposite signs
-    sample_rho = brentq(root_func, rho_vals[0], rho_vals[-1])
-    # Return the sampled radial distance
-    return sample_rho
-
-# Example usage:
-if __name__ == "__main__":
-    T = 1.0  # Time horizon
-    R = 1.0  # Disk radius
-    
-    # Generate 5 samples and print
-    for _ in range(5):
-        sample = generate_sample_from_cdf(T, R)
-        print(f"Sampled |B_T| = {sample:.4f}")
-
-    # Optional: plot the CDF for visualization
-    rho_vals = np.linspace(0, R, 500)
-    cdf_vals = compute_cdf(T, R, rho_vals)
-    plt.plot(rho_vals, cdf_vals, label='CDF of |B_T| conditioned on survival')
-    plt.xlabel(r'$\rho$')
-    plt.ylabel(r'CDF $F(\rho)$')
-    plt.title(r'CDF of radial distance $|B_T|$ in disk of radius $R$')
-    plt.grid(True)
-    plt.legend()
-    plt.show()
-
-
-
-\end{lstlisting}
-\end{document}
-
-
-
 
 
 \end{document}
