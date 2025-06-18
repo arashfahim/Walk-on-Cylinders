@@ -8,12 +8,12 @@ def compute_cdf(T, R, p_grid, N_terms=100):
     Compute the unnormalized CDF F(p) = u(T,0,R,p)
     and return both the conditional CDF and survival probability P(tau_R ≥ T)
     parameters:
-    T : float, time horizon
-    R : float, radius of the circle
-    p_grid : array-like, grid of distances |B_T|
-    N_terms : int, number of terms in the series expansion
+        T : float, time horizon
+        R : float, radius of the circle
+        p_grid : array-like, grid of distances |B_T|
+        N_terms : int, number of terms in the series expansion
     returns:
-    cdf_vals : array-like, CDF values at p_grid
+        cdf_vals : array-like, CDF values at p_grid
     survival_prob : float, P(tau_R ≥ T)
     """
     Z = jn_zeros(0, N_terms)
