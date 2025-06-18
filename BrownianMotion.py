@@ -20,6 +20,7 @@ def compute_cdf(T, R, p_grid, N_terms=100):
     cdf_vals = np.zeros_like(p_grid)
 
     # Compute the CDF using the series expansion
+    # Note that J_0(0) = 1
     # F(p) = sum_{n=0}^{N_terms-1} (2p / (R * Z_n * (j1(Z_n)^2))) * j1(Z_n * p / R) * exp(-Z_n^2 * T / (2 * R^2))
     # where Z_n are the zeros of the Bessel function J_0
     
