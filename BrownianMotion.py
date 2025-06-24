@@ -1,98 +1,119 @@
-# Brownian Motion in a Disk: CDF and Sampling
-# This code computes the cumulative distribution function (CDF) of the radial distance
-# of a Brownian motion conditioned to stay within a disk of radius R at time T.
-# It uses a series expansion based on Bessel functions and performs inverse transform sampling
-# to generate samples from this distribution.
-
 import numpy as np
 from scipy.special import j0, j1, jn_zeros
 from scipy.interpolate import interp1d
-from scipy.optimize import brentq
 import matplotlib.pyplot as plt
-import random
 
-def compute_cdf(T, R, rho_vals, N_terms=100):
+def compute_cdf(T, R, p_grid, N_terms=100):
     """
-    Compute CDF F(rho) = P(|B_T| <= rho | survive inside disk of radius R)
-    using the truncated series expansion with N_terms.
-    Parameters:
-      T       : float, time horizon
-      R       : float, disk radius
-      rho_vals: array of floats, points where to compute CDF (0 to R)
-      N_terms : int, number of terms in series expansion
-    Returns:
-      cdf_vals: array of floats, CDF values at rho_vals
+    Compute the unnormalized CDF F(p) = u(T,0,R,p)
+    and return both the conditional CDF and survival probability P(tau_R ≥ T)
+    parameters:
+        T : float, time horizon
+        R : float, radius of the circle
+        p_grid : array-like, grid of distances |B_T|
+        N_terms : int, number of terms in the series expansion
+    returns:
+        cdf_vals : array-like, CDF values at p_grid
+    survival_prob : float, P(tau_R ≥ T)
     """
-    alpha = jn_zeros(0, N_terms)  # First N_terms zeros of J0
-    cdf_vals = np.zeros_like(rho_vals)
-    r = 0.0  # Use the maximum rho for normalization
-    for n in range(N_terms):
-        Zn = alpha[n]
-        # Precompute constants
-        denom = R * Zn * (j1(Zn )**2)
-        for i, rho in enumerate(rho_vals):
-            if rho == 0:
-                term = 0
-            else:
-                term = (2 * rho / denom) * j1(Zn * rho / R) * j0(Zn * r / R) * np.exp(- (Zn**2) * T / (2 * R**2))
-            cdf_vals[i] += term
-            
-    # Ensure CDF starts at 0 and ends at 1 (numerical)
-    if len(cdf_vals) > 0:
-        cdf_vals -= np.min(cdf_vals)  # Normalize to start at 0
-        cdf_vals /= np.max(cdf_vals)  # Normalize to end at 1
-    return cdf_vals
+    Z = jn_zeros(0, N_terms)
+    cdf_vals = np.zeros_like(p_grid)
 
-def generate_sample_from_cdf(T, R, N_terms=50, grid_points=1000):
-    """
-    Generate a single sample from the distribution of |B_T| conditioned to stay inside disk radius R.
-    """
-    # Create fine grid of rho
-    rho_grid = np.linspace(0, R, grid_points)
-    cdf_vals = compute_cdf(T, R, rho_grid, N_terms)
-
-    # Create interpolation function of the CDF
-    cdf_interp = interp1d(rho_grid, cdf_vals, kind='linear', bounds_error=False, fill_value=(0,1))
-
-    # Inverse transform sampling:
-    u = random.uniform(0, 1)
-
-     # Safety check: handle edges
-    eps = 1e-10
-    if u <= cdf_vals[0] + eps:
-        return rho_grid[0]
-    elif u >= cdf_vals[-1] - eps:
-        return rho_grid[-1] - eps  # stay within interpolation range
-
+    # Compute the CDF using the series expansion
+    # Note that J_0(0) = 1
+    # F(p) = sum_{n=0}^{N_terms-1} (2p / (R * Z_n * (j1(Z_n)^2))) * j1(Z_n * p / R) * exp(-Z_n^2 * T / (2 * R^2))
+    # where Z_n are the zeros of the Bessel function J_0
     
-    # Define function to find root for inversion: cdf(rho) - u = 0
-    def root_func(rho):
-        return cdf_interp(rho) - u
+    for i, p in enumerate(p_grid):
+        if p == 0:
+            cdf_vals[i] = 0.0
+        else:
+            series_sum = 0.0
+            for n in range(N_terms):
+                z = Z[n]
+                coef = (2 * p) / (R * z * (j1(z) ** 2))
+                term = coef * j1(z * p / R) * np.exp(- (z ** 2) * T / (2 * R ** 2))
+                series_sum += term
+            cdf_vals[i] = series_sum
 
-    # Find root in [0, R] using Brent's method
-    # find p such thatf(p)=u
-    # f(a) and f(b) must have opposite signs
-    sample_rho = brentq(root_func, rho_grid[0], rho_grid[-1])
-    # Return the sampled radial distance
-    return sample_rho
+    survival_prob = cdf_vals[-1]  # value at p = R (last point) = P(tau_R ≥ T)
 
-# Example usage:
-if __name__ == "__main__":
-    T = 1.0
-    R = 1.0
-    print("Sampled values of |B_T|:")
-    for _ in range(5):
-        sample = generate_sample_from_cdf(T, R)
-        print(f"{sample:.4f}")
+    # Normalize the CDF for conditional distribution
+    cdf_vals /= survival_prob
 
-    # Optional: plot the CDF for visualization
-    rho_x = np.linspace(0, R, 500)
-    cdf_y = compute_cdf(T, R, rho_x)
-    plt.plot(rho_x, cdf_y, label='CDF of |B_T| conditioned on survival')
-    plt.xlabel(r'$\rho$')
-    plt.ylabel(r'CDF $F(\rho)$')
-    plt.title(r'CDF of radial distance $|B_T|$ in disk of radius $R$')
-    plt.grid(True)
-    plt.legend()
-    plt.show()
-    plt.savefig("Brownian_Motion.png")
+    return cdf_vals, survival_prob
+
+def compute_inverse_cdf(T, R, N_terms=100, grid_points=1000):
+    """
+    Compute the inverse CDF F^(-1)(u) for inverse transform sampling
+    """
+    p_grid = np.linspace(0, R, grid_points)
+    cdf_vals, survival_prob = compute_cdf(T, R, p_grid, N_terms)
+
+    # Ensure CDF is increasing
+    if np.any(np.diff(cdf_vals) < 0):
+        raise ValueError("CDF not strictly increasing. Try increasing N_terms.")
+
+    p_inverse = interp1d(cdf_vals, p_grid, kind='cubic', bounds_error=False, fill_value=(0, R))
+    return p_inverse, cdf_vals, p_grid, survival_prob
+
+def generate_sample_from_cdf(p_inverse, num_samples=1000):
+    """
+    Sample from the distribution using inverse transform sampling
+    """
+    u = np.random.uniform(0, 1, num_samples)
+    return p_inverse(u)
+
+
+# Brownian Motion Conditional CDF and PDF Sampling
+# Parameters
+T = 1.0
+R = 1.0
+num_samples = 1000
+
+# Step 1: Compute inverse CDF and theoretical CDF
+p_inverse, cdf_theoretical, p_grid, survival_prob = compute_inverse_cdf(T, R)
+
+# Step 2: Generate samples
+samples = generate_sample_from_cdf(p_inverse, num_samples)
+
+
+# Step 3: Plot results
+plt.figure(figsize=(12, 5))
+
+# CDF plot
+plt.subplot(1, 2, 1)
+plt.plot(p_grid, cdf_theoretical, label='Theoretical CDF', color='blue')
+plt.xlabel('Distance |B_T|')
+plt.ylabel('CDF F(p)')
+plt.title('Conditional CDF of |B_T| (Given Survival)')
+plt.legend()
+
+# PDF plot
+plt.subplot(1, 2, 2)
+pdf_theoretical = np.gradient(cdf_theoretical, p_grid)
+plt.hist(samples, bins=50, density=True, alpha=0.5, label='Sample Histogram (PDF)', color='orange')
+plt.plot(p_grid, pdf_theoretical, label='Theoretical PDF', color='blue')
+plt.xlabel('Distance |B_T|')
+plt.ylabel('Density')
+plt.title('PDF: Theoretical vs Sampled (Conditional)')
+plt.legend()
+
+plt.tight_layout()
+plt.show()
+
+# Statistics
+print(f"\nGenerated {num_samples} samples with:")
+print(f"Mean: {np.mean(samples):.4f}")
+print(f"Std Dev: {np.std(samples):.4f}")
+
+# Survival Probability
+print(f"\nSurvival Probability P(τ_R ≥ T) = {survival_prob:.6f}")
+print(f"Hitting Probability P(τ_R ≤ T) = {1 - survival_prob:.6f}")
+
+# Evaluate CDF at specific rho values
+F_interp = interp1d(p_grid, cdf_theoretical, kind='cubic', bounds_error=False, fill_value=(0, 1))
+rho_values = [0.0, 0.25, 0.5, 0.75, 1.0]
+print("\nCDF values F(ρ):")
+for rho in rho_values:
+    print(f"F({rho:.2f}) = {F_interp(rho):.6f}")
