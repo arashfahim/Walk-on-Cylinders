@@ -44,3 +44,65 @@ def compute_conditional_spatial_cdf(T, R, p_grid, Z):
     survival_prob = cdf_vals[-1]
     cdf_vals /= survival_prob
     return cdf_vals, survival_prob
+<<<<<<< Updated upstream
+=======
+
+S = .5
+T = 2.0
+R = np.sqrt(T/S)
+N_terms = 100
+Z = get_bessel_zeros(0, N_terms)
+
+t_vals = np.linspace(0.001, T, 300)
+F_time = temporal_cdf(t_vals, Z)
+
+p_grid = np.linspace(0, R, 300)
+F_conditional_rho, P_survival = compute_conditional_spatial_cdf(T, R, p_grid, Z)
+
+plt.figure(figsize=(8, 8))
+
+plt.subplot(2, 2, 1)
+plt.plot(t_vals, F_time, lw=2)
+plt.xlabel(r'$t$')
+plt.ylabel(r'$\mathbb{P}(\tau_R < t)$')
+plt.title('CDF (Exit Time)')
+plt.grid(True)
+
+plt.subplot(2, 2, 3)
+plt.axhline(P_survival, color='green', lw=2)
+plt.text(0.5, P_survival + 0.02, f"P(τ ≥ T) ≈ {P_survival:.4f}", fontsize=12)
+plt.xlim(0, 1)
+plt.ylim(0, 1.1)
+plt.xticks([])
+plt.ylabel('Probability')
+plt.title('Survival Probability at T')
+plt.grid(True)
+
+plt.subplot(2, 2, 2)
+plt.plot(p_grid, F_conditional_rho, lw=2)
+plt.xlabel(r'$\rho$')
+plt.ylabel(r'$\mathbb{P}(|B_T| < \rho \mid \tau_R \geq T)$')
+plt.title('Spatial CDF')
+plt.grid(True)
+
+s_grid = np.linspace(0.1,2.,20)
+N_terms = 100
+Z = get_bessel_zeros(0, N_terms)
+
+survival_s = []
+for s in s_grid:
+    rho_grid = np.linspace(0, np.sqrt(T/s), 300)
+    _, P_survival = compute_conditional_spatial_cdf(T, np.sqrt(T/s), rho_grid, Z)
+    survival_s.append(P_survival)
+    
+plt.subplot(2, 2, 4)
+plt.plot(s_grid, survival_s, lw=2)
+plt.xlabel(r'$s$')
+plt.ylabel(r'$\mathbb{P}(\tau_R  \geq T \mid S = s)$')
+plt.title('Survival probability vs s')
+plt.grid(True)
+
+plt.tight_layout()
+plt.savefig('cdfs.png', dpi=600)
+plt.show()
+>>>>>>> Stashed changes
