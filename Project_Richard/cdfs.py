@@ -44,8 +44,8 @@ def compute_conditional_spatial_cdf(T, R, p_grid, Z):
     survival_prob = cdf_vals[-1]
     cdf_vals /= survival_prob
     return cdf_vals, survival_prob
-<<<<<<< Updated upstream
-=======
+# <<<<<<< Updated upstream
+# =======
 
 S = .5
 T = 2.0
