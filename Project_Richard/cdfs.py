@@ -18,13 +18,13 @@ def get_bessel_zeros(v, N, step=np.pi):
             x_max += step
     return np.array(zeros)
 
-def temporal_cdf(t_vals, Z):
+def temporal_cdf(t_vals, R, Z):
     cdf_vals = []
     for t in t_vals:
         s = 0.0
         for n in range(len(Z)):
             coeff = 2 / ((Z[n]) * (j1(Z[n])))
-            s += coeff * np.exp(-Z[n]**2 * (t/2))
+            s += coeff * np.exp(-Z[n]**2 * t/(2*R**2))
         cdf_vals.append(1 - s)
     return np.array(cdf_vals)
 
