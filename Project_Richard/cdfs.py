@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.special import j1
 
 def temporal_cdf(t_vals, R, Z):
     cdf_vals = []
