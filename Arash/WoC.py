@@ -6,9 +6,9 @@ from cdfs import temporal_cdf, compute_conditional_spatial_cdf
 T_total    = 1  # Terminal time     
 S          = 1   #T/R^2
 DIM        = 2  #dimension
-N_ZEROS    = 20 #number of terms in the Bessel series
-INV_T_GRID = 20    # number of points in the time grid for inverse transform sampling
-INV_R_GRID = 50      # number of points in the radius (rho) grid for conditional CDF 
+N_ZEROS    = 200 #number of terms in the Bessel series
+INV_T_GRID = 2000    # number of points in the time grid for inverse transform sampling
+INV_R_GRID = 500      # number of points in the radius (rho) grid for conditional CDF 
 
 
 # evaluation of the Bessel zeros
