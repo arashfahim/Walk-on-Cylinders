@@ -3,19 +3,22 @@ from bessel_zeros import get_bessel_zeros
 from cdfs import temporal_cdf, compute_conditional_spatial_cdf
 import matplotlib.pyplot as plt
 
-T_total    = 1       
-S          = 1   
-DIM        = 2
-N_ZEROS    = 200
-INV_T_GRID = 2000      
-INV_R_GRID = 500       
+T_total    = 1  # Terminal time     
+S          = 1   #T/R^2
+DIM        = 2  #dimension
+N_ZEROS    = 200 #number of terms in the Bessel series
+INV_T_GRID = 2000    # number of points in the time grid for inverse transform sampling
+INV_R_GRID = 500      # number of points in the radius (rho) grid for conditional CDF 
 
-zeros = get_bessel_zeros(DIM, N_ZEROS)
+# evaluation of the Bessel zeros
+zeros = get_bessel_zeros(DIM, N_ZEROS) 
 
+
+# simulate paths of Brownian motion in 2D
 def simulate_path(T_total, S, max_segments=1000):
-    T_rem  = T_total
-    center = np.zeros(2)
-    path   = []
+    T_rem  = T_total # remaining time
+    center = np.zeros(2) # start at the origin
+    path   = [] 
 
     for _ in range(max_segments):
         if T_rem <= 0:
@@ -110,6 +113,6 @@ def plot_path(path):
 
 if __name__=='__main__':
     path = simulate_path(T_total, S)
-    for i, seg in enumerate(path, 1):
+    for i, seg in enumerate(path, 3):
         print(f"Seg {i}: R={seg['R']:.3f}, τ_phys={seg['tau_phys']:.4e}, survived={seg['survived']}")
     plot_path(path)

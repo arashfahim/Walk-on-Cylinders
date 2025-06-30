@@ -104,9 +104,9 @@ plt.grid(True)
 
 plt.tight_layout()
 plt.savefig('cdfs.png', dpi=600)
-<<<<<<< Updated upstream
+# <<<<<<< Updated upstream
 plt.show()
->>>>>>> Stashed changes
-=======
+# >>>>>>> Stashed changes
+# =======
 plt.show()
->>>>>>> Stashed changes
+# >>>>>>> Stashed changes
