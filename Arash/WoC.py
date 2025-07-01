@@ -6,9 +6,9 @@ from cdfs import temporal_cdf, compute_conditional_spatial_cdf
 T_total    = 1  # Terminal time     
 S          = 1   #T/R^2
 DIM        = 2  #dimension
-N_ZEROS    = 20 #number of terms in the Bessel series
-INV_T_GRID = 20    # number of points in the time grid for inverse transform sampling
-INV_R_GRID = 50      # number of points in the radius (rho) grid for conditional CDF 
+N_ZEROS    = 200 #number of terms in the Bessel series
+INV_T_GRID = 2000    # number of points in the time grid for inverse transform sampling
+INV_R_GRID = 500      # number of points in the radius (rho) grid for conditional CDF 
 
 
 # evaluation of the Bessel zeros
@@ -30,7 +30,7 @@ def simulate_path(T_total, S, max_segments=1000):
         phi = 2*np.pi*np.random.rand()
 
         # 2) compute spatial‐CDF & survival prob *once*
-        r_grid        = np.linspace(0, R, INV_R_GRID)
+        r_grid, _    = np.linspace(0, R, INV_R_GRID), None
         cdf_r, p_surv = compute_conditional_spatial_cdf(T_rem, R, r_grid, zeros)
 
         # 3) branch
