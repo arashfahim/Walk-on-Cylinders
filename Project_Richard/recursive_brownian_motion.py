@@ -30,7 +30,7 @@ def simulate_path(T_total, S, max_segments=1000):
         phi = 2*np.pi*np.random.rand()
 
         # 2) compute spatial‐CDF & survival prob *once*
-        r_grid, _    = np.linspace(0, R, INV_R_GRID), None
+        r_grid        = np.linspace(0, R, INV_R_GRID)
         cdf_r, p_surv = compute_conditional_spatial_cdf(T_rem, R, r_grid, zeros)
 
         # 3) branch
