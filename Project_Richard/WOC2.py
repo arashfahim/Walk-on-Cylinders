@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from bessel_zeros import get_bessel_zeros
 from cdfs2 import build_cdfs
 from scipy.stats import norm
+import time
 
 T_total    = 1
 S          = 1
@@ -18,7 +19,7 @@ zeros = get_bessel_zeros(DIM, N_ZEROS)
 print("p_surv0 =", p_surv0)
 p_exit0 = 1.0 - p_surv0
 
-def simulate_path(T_total, S, max_segments=100):
+def simulate_path(T_total, S, max_segments=20): # S = T/R^2
     T_rem  = T_total
     center = np.zeros(2)
     path   = []
@@ -130,17 +131,18 @@ if __name__=='__main__':
     # for i, seg in enumerate(path, 1):
     #     print(f"Seg {i}: R={seg['R']:.3f}, τ_phys={seg['tau']:.4e}, survived={seg['survived']}")
     # plot_path(path)
-
+    # simulating sample paths
     N = 100000
     final_positions = np.zeros((N, 2))
     segment_counts  = np.zeros(N, dtype=int)
-
+    t0 = time.time()
     for i in range(N):
-        if(i % 100 == 0):
+        if(i % int(N/1000) == 0):
             print(i)
         path = simulate_path(T_total, S)
         final_positions[i] = path[-1]['end']
         segment_counts[i]  = len(path)
+    print(f"Simulation time for N={N}: {time.time() - t0:.2f} seconds")
 
     mean_pos = final_positions.mean(axis=0)        
     var_pos  = final_positions.var(axis=0)           
@@ -152,7 +154,7 @@ if __name__=='__main__':
     avg_segments = segment_counts.mean()
     var_segments = segment_counts.var()
     print(f"Average # of segments:    {avg_segments:.2f}")
-    print(f"Variance in # segments:   {var_segments:.2f}")
+    print(f"STD in # segments:   {np.sqrt(var_segments):.2f}")
 
     plt.figure(figsize=(5,5))
     plt.scatter(final_positions[:,0], final_positions[:,1], s=2, alpha=0.1)
@@ -162,6 +164,8 @@ if __name__=='__main__':
 
     x = final_positions[:,0]
     y = final_positions[:,1]
+    
+    
 
     for coord, name in ((x,'X'), (y,'Y')):
         plt.figure()
