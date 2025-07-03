@@ -175,3 +175,22 @@ if __name__=='__main__':
         plt.plot(xs, pdf, 'r-', lw=2, label=f"N(0,√{T_total}) PDF")
         plt.title(f"{name}_T")
     plt.show()
+    
+    
+'''M = 10000
+T = 1
+dt = T/M
+dx = np.sqrt(dx)
+samples = {}
+steps = [np.array([dx,0]),np.array([-dx,0]),np.array([0,dx]),np.array([0,-dx])]
+for n in range(100000):
+    for m in range(M):
+        if m == 0:
+            u = np.array([[0.0,0.0]])
+            t = u
+        else:
+            u += random.choice(steps)
+            t = np.concatenate((t,u), axis = 0)
+
+    samples[str(n+1)] = t
+    '''    
