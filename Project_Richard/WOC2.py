@@ -127,51 +127,51 @@ def plot_path(path):
     plt.tight_layout()
 
 if __name__=='__main__':
-    # path = simulate_path(T_total, S)
-    # for i, seg in enumerate(path, 1):
-    #     print(f"Seg {i}: R={seg['R']:.3f}, τ_phys={seg['tau']:.4e}, survived={seg['survived']}")
-    # plot_path(path)
+    path = simulate_path(T_total, S)
+    for i, seg in enumerate(path, 1):
+        print(f"Seg {i}: R={seg['R']:.3f}, τ_phys={seg['tau']:.4e}, survived={seg['survived']}")
+    plot_path(path)
     # simulating sample paths
-    N = 100000
-    final_positions = np.zeros((N, 2))
-    segment_counts  = np.zeros(N, dtype=int)
-    t0 = time.time()
-    for i in range(N):
-        if(i % int(N/1000) == 0):
-            print(i)
-        path = simulate_path(T_total, S)
-        final_positions[i] = path[-1]['end']
-        segment_counts[i]  = len(path)
-    print(f"Simulation time for N={N}: {time.time() - t0:.2f} seconds")
+    # N = 100000
+    # final_positions = np.zeros((N, 2))
+    # segment_counts  = np.zeros(N, dtype=int)
+    # t0 = time.time()
+    # for i in range(N):
+    #     if(i % int(N/100) == 0):
+    #         print(i)
+    #     path = simulate_path(T_total, S)
+    #     final_positions[i] = path[-1]['end']
+    #     segment_counts[i]  = len(path)
+    # print(f"Simulation time for N={N}: {time.time() - t0:.2f} seconds")
 
-    mean_pos = final_positions.mean(axis=0)        
-    var_pos  = final_positions.var(axis=0)           
-    cov_pos  = np.cov(final_positions, rowvar=False)
-    print(f"Mean final position: x={mean_pos[0]:f}, y={mean_pos[1]:f}")
-    print(f"Variance:            var(x)={var_pos[0]:}, var(y)={var_pos[1]:}")
-    print("Covariance matrix:\n", cov_pos)
+    # mean_pos = final_positions.mean(axis=0)        
+    # var_pos  = final_positions.var(axis=0)           
+    # cov_pos  = np.cov(final_positions, rowvar=False)
+    # print(f"Mean final position: x={mean_pos[0]:f}, y={mean_pos[1]:f}")
+    # print(f"Variance:            var(x)={var_pos[0]:}, var(y)={var_pos[1]:}")
+    # print("Covariance matrix:\n", cov_pos)
 
-    avg_segments = segment_counts.mean()
-    var_segments = segment_counts.var()
-    print(f"Average # of segments:    {avg_segments:.2f}")
-    print(f"STD in # segments:   {np.sqrt(var_segments):.2f}")
+    # avg_segments = segment_counts.mean()
+    # var_segments = segment_counts.var()
+    # print(f"Average # of segments:    {avg_segments:.2f}")
+    # print(f"STD in # segments:   {np.sqrt(var_segments):.2f}")
 
-    plt.figure(figsize=(5,5))
-    plt.scatter(final_positions[:,0], final_positions[:,1], s=2, alpha=0.1)
-    plt.axis('equal')
-    plt.title(f"Final positions (N={N})")
-    plt.xlabel("x"); plt.ylabel("y")
+    # plt.figure(figsize=(5,5))
+    # plt.scatter(final_positions[:,0], final_positions[:,1], s=2, alpha=0.1)
+    # plt.axis('equal')
+    # plt.title(f"Final positions (N={N})")
+    # plt.xlabel("x"); plt.ylabel("y")
 
-    x = final_positions[:,0]
-    y = final_positions[:,1]
+    # x = final_positions[:,0]
+    # y = final_positions[:,1]
     
     
 
-    for coord, name in ((x,'X'), (y,'Y')):
-        plt.figure()
-        plt.hist(coord, bins=50, density=True, alpha=0.6, label=f"Empirical {name}")
-        xs = np.linspace(coord.min(), coord.max(), 200)
-        pdf = norm.pdf(xs, loc=0, scale=np.sqrt(T_total))
-        plt.plot(xs, pdf, 'r-', lw=2, label=f"N(0,√{T_total}) PDF")
-        plt.title(f"{name}_T")
+    # for coord, name in ((x,'X'), (y,'Y')):
+    #     plt.figure()
+    #     plt.hist(coord, bins=50, density=True, alpha=0.6, label=f"Empirical {name}")
+    #     xs = np.linspace(coord.min(), coord.max(), 200)
+    #     pdf = norm.pdf(xs, loc=0, scale=np.sqrt(T_total))
+    #     plt.plot(xs, pdf, 'r-', lw=2, label=f"N(0,√{T_total}) PDF")
+    #     plt.title(f"{name}_T")
     plt.show()
