@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.special import j1
 
-def build_cdfs(S, Z, INV_R_GRID=500, INV_T_GRID=2000):
+def build_cdfs(S, Z, INV_R_GRID=2000, INV_T_GRID=2000):
     # 1) dimensionless grids on [0,1]
     r_star_grid = np.linspace(0, 1, INV_R_GRID)
     t_star_grid = np.linspace(0, 1, INV_T_GRID)

@@ -3,25 +3,25 @@ import matplotlib.pyplot as plt
 from bessel_zeros import get_bessel_zeros
 from cdfs2 import build_cdfs
 from scipy.stats import norm
-import time
 
 T_total    = 1
-S          = 1
 DIM        = 2
+S          = DIM
 N_ZEROS    = 200
 INV_T_GRID = 2000
 INV_R_GRID = 2000
+K          = 1
+s          = 1
 
 zeros = get_bessel_zeros(DIM, N_ZEROS)
 (sp_r, cdf_r_star, p_surv0), (sp_t, raw_cdf_t_star) = build_cdfs(
-    S, zeros, INV_T_GRID, INV_T_GRID
+    S, zeros, INV_T_GRID, INV_R_GRID
 )
-print("p_surv0 =", p_surv0)
 p_exit0 = 1.0 - p_surv0
 
-def simulate_path(T_total, S, max_segments=20): # S = T/R^2
+def simulate_path(T_total, S, max_segments=100):
     T_rem  = T_total
-    center = np.zeros(2)
+    center = np.full(DIM, s)
     path   = []
     tol = 1e-3
 
@@ -127,22 +127,23 @@ def plot_path(path):
     plt.tight_layout()
 
 if __name__=='__main__':
-    path = simulate_path(T_total, S)
-    for i, seg in enumerate(path, 1):
-        print(f"Seg {i}: R={seg['R']:.3f}, τ_phys={seg['tau']:.4e}, survived={seg['survived']}")
-    plot_path(path)
-    # simulating sample paths
+    #---One Simulation---
+    # path = simulate_path(T_total, S)
+    # for i, seg in enumerate(path, 1):
+    #     print(f"Seg {i}: R={seg['R']:.3f}, τ_phys={seg['tau']:.4e}, survived={seg['survived']}")
+    # plot_path(path)
+
+    #---Many Simulations--- (Mean, Variance, ...)
     # N = 100000
     # final_positions = np.zeros((N, 2))
-    # segment_counts  = np.zeros(N, dtype=int)
-    # t0 = time.time()
+    # # segment_counts  = np.zeros(N, dtype=int)
+
     # for i in range(N):
-    #     if(i % int(N/100) == 0):
+    #     if(i % 100 == 0):
     #         print(i)
-    #     path = simulate_path(T_total, S)
-    #     final_positions[i] = path[-1]['end']
-    #     segment_counts[i]  = len(path)
-    # print(f"Simulation time for N={N}: {time.time() - t0:.2f} seconds")
+        # path = simulate_path(T_total, S)
+        # final_positions[i] = path[-1]['end']
+        # segment_counts[i]  = len(path)
 
     # mean_pos = final_positions.mean(axis=0)        
     # var_pos  = final_positions.var(axis=0)           
@@ -154,7 +155,7 @@ if __name__=='__main__':
     # avg_segments = segment_counts.mean()
     # var_segments = segment_counts.var()
     # print(f"Average # of segments:    {avg_segments:.2f}")
-    # print(f"STD in # segments:   {np.sqrt(var_segments):.2f}")
+    # print(f"Variance in # segments:   {var_segments:.2f}")
 
     # plt.figure(figsize=(5,5))
     # plt.scatter(final_positions[:,0], final_positions[:,1], s=2, alpha=0.1)
@@ -164,10 +165,7 @@ if __name__=='__main__':
 
     # x = final_positions[:,0]
     # y = final_positions[:,1]
-    
-    
 
-<<<<<<< HEAD
     # for coord, name in ((x,'X'), (y,'Y')):
     #     plt.figure()
     #     plt.hist(coord, bins=50, density=True, alpha=0.6, label=f"Empirical {name}")
@@ -175,33 +173,20 @@ if __name__=='__main__':
     #     pdf = norm.pdf(xs, loc=0, scale=np.sqrt(T_total))
     #     plt.plot(xs, pdf, 'r-', lw=2, label=f"N(0,√{T_total}) PDF")
     #     plt.title(f"{name}_T")
-    plt.show()
-=======
-    for coord, name in ((x,'X'), (y,'Y')):
-        plt.figure()
-        plt.hist(coord, bins=50, density=True, alpha=0.6, label=f"Empirical {name}")
-        xs = np.linspace(coord.min(), coord.max(), 200)
-        pdf = norm.pdf(xs, loc=0, scale=np.sqrt(T_total))
-        plt.plot(xs, pdf, 'r-', lw=2, label=f"N(0,√{T_total}) PDF")
-        plt.title(f"{name}_T")
-    plt.show()
-    
-    
-'''M = 10000
-T = 1
-dt = T/M
-dx = np.sqrt(dx)
-samples = {}
-steps = [np.array([dx,0]),np.array([-dx,0]),np.array([0,dx]),np.array([0,-dx])]
-for n in range(100000):
-    for m in range(M):
-        if m == 0:
-            u = np.array([[0.0,0.0]])
-            t = u
-        else:
-            u += random.choice(steps)
-            t = np.concatenate((t,u), axis = 0)
+    # plt.show()
 
-    samples[str(n+1)] = t
-    '''    
->>>>>>> 7dc15de38194e6954764a681819c67df9062ee58
+    #Monte Carlo Simulations
+    N = 1_000_000
+    final_positions = np.zeros((N,2))
+    for i in range(N):
+        if(i % 1000 == 0):
+            print(i)
+        path = simulate_path(T_total, S)
+        final_positions[i] = path[-1]['end']
+        
+    barS = final_positions.mean(axis=1)
+    payoffs = np.maximum(barS - K, 0)
+    C_MC    = payoffs.mean()
+    se_MC  = payoffs.std(ddof=1)/np.sqrt(N)
+
+    print(f"Monte Carlo:    C = {C_MC:.6f}  ± {1.96*se_MC:.4f}")

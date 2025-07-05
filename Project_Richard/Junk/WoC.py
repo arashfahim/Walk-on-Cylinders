@@ -3,26 +3,23 @@ import matplotlib.pyplot as plt
 from bessel_zeros import get_bessel_zeros
 from cdfs import temporal_cdf, compute_conditional_spatial_cdf
 
-T_total    = 1  # Terminal time     
-S          = 1   #T/R^2
-DIM        = 2  #dimension
-N_ZEROS    = 20 #number of terms in the Bessel series
-INV_T_GRID = 20    # number of points in the time grid for inverse transform sampling
-INV_R_GRID = 50      # number of points in the radius (rho) grid for conditional CDF 
+T_total    = 1
+S          = 1
+DIM        = 2
+N_ZEROS    = 200
+INV_T_GRID = 2000
+INV_R_GRID = 500
 
+zeros = get_bessel_zeros(DIM, N_ZEROS)
 
-# evaluation of the Bessel zeros
-zeros = get_bessel_zeros(DIM, N_ZEROS) 
-
-
-# simulate paths of Brownian motion in 2D
-def simulate_path(T_total, S, max_segments=1000):
-    T_rem  = T_total # remaining time
-    center = np.zeros(2) # start at the origin
-    path   = [] 
+def simulate_path(T_total, S, max_segments=20):
+    T_rem  = T_total
+    center = np.zeros(2)
+    path   = []
 
     for _ in range(max_segments):
-        if T_rem <= 0:
+        tol = 10e-3
+        if T_rem <= tol:
             break
 
         # 1) cylinder radius & random angle
@@ -32,7 +29,7 @@ def simulate_path(T_total, S, max_segments=1000):
         # 2) compute spatial‐CDF & survival prob *once*
         r_grid        = np.linspace(0, R, INV_R_GRID)
         cdf_r, p_surv = compute_conditional_spatial_cdf(T_rem, R, r_grid, zeros)
-
+    
         # 3) branch
         u = np.random.rand()
         if u < p_surv:
@@ -69,9 +66,8 @@ def simulate_path(T_total, S, max_segments=1000):
         T_rem  -= tau
         center  = end
         if survived:
-            break
-
-    return path
+            return path
+            
 
 def plot_path(path):
     fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(12, 5))
@@ -117,9 +113,6 @@ def plot_path(path):
 
 if __name__=='__main__':
     path = simulate_path(T_total, S)
-    # print path details
-    for i, seg in enumerate(path):
-        print(f"Seg {i}: R={seg['R']:.3f}, τ_phys={seg['tau']:.4e}, survived={seg['survived']}")
-    for i, seg in enumerate(path,1):# Did you set start =1?
+    for i, seg in enumerate(path, 1):
         print(f"Seg {i}: R={seg['R']:.3f}, τ_phys={seg['tau']:.4e}, survived={seg['survived']}")
     plot_path(path)
