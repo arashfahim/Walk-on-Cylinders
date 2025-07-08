@@ -75,5 +75,4 @@ def get_bessel_zeros_from_cache(v, n):
         return cache[v_str]["zeros"][:n]
     return []
 
-
-
+get_bessel_zeros(1000, 10)
