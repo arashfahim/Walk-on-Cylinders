@@ -6,9 +6,9 @@ from cdfs2 import build_cdfs
 from scipy.stats import norm
 from options_simulation import bachelier_formula
 
-T_total    = 1
+T_total    = 10
 DIM        = 2
-S          = 1
+S          = 0.9
 N_ZEROS    = 200
 INV_T_GRID = 2000
 INV_R_GRID = 2000
@@ -25,7 +25,7 @@ def simulate_path(T_total, S, max_segments=100):
     T_rem  = T_total
     center = np.full(DIM, s)
     path   = []
-    tol = 1e-3
+    tol = 1e-1
 
     for _ in range(max_segments):
         if T_rem <= tol:
@@ -111,19 +111,20 @@ def plot_path(path):
     ax0.set_aspect('equal')
     ax0.set_xlim(min(xs)-0.1, max(xs)+0.1)
     ax0.set_ylim(min(ys)-0.1, max(ys)+0.1)
-    ax0.set_title('Cylinders & Paths')
-    ax0.set_xlabel('X')
-    ax0.set_ylabel('Y')
+    ax0.set_title('WoC')
+    ax0.set_xlabel(r'$x_1$')
+    ax0.set_ylabel(r'$x_2$')
 
     u_vals = [s['u'] for s in path]
     t_cum  = np.cumsum([s['tau'] for s in path])
     idx    = np.arange(1, len(path)+1)
-    ax1.plot(idx, u_vals, 'o-',  label='u_i')
-    ax1.plot(idx, t_cum,  's--', label='cumul. time')
+    ax1.plot(idx, u_vals, 'o-',  label=r'$\tau_i$: hitting time to sphere')
+    ax1.plot(idx, t_cum,  's--', label=r'$\sum\tau_i$')
     ax1.set_xticks(idx)
-    ax1.set_xlabel('Segment Index')
-    ax1.set_ylabel('Value')
-    ax1.set_title('Uniforms & Cumul. Time')
+    ax1.set_ylim([0,1.1*T_total]);
+    ax1.set_xlabel(r'$\#$ spheres')
+    ax1.set_ylabel(r'$t$')
+    ax1.set_title(r'Hitting times and cumulative times to $T$')
     ax1.legend()
 
     plt.tight_layout()
@@ -179,69 +180,69 @@ if __name__=='__main__':
     # plt.show()
 
     # --Monte Carlo Simulations--
-    N = 100_000
-    final_positions = np.zeros((N,2))
-    for i in range(N):
-        if(i % 1000 == 0):
-            print(i)
-        path = simulate_path(T_total, S)
-        final_positions[i] = path[-1]['end']
+    # N = 100_000
+    # final_positions = np.zeros((N,2))
+    # for i in range(N):
+    #     if(i % 1000 == 0):
+    #         print(i)
+    #     path = simulate_path(T_total, S)
+    #     final_positions[i] = path[-1]['end']
         
-    barS = final_positions.mean(axis=1)
-    payoffs = np.maximum(barS - K, 0)
-    C_MC    = payoffs.mean()
+    # barS = final_positions.mean(axis=1)
+    # payoffs = np.maximum(barS - K, 0)
+    # C_MC    = payoffs.mean()
 
-    print(f"Monte Carlo:    C = {C_MC:.6f}")
+    # print(f"Monte Carlo:    C = {C_MC:.6f}")
 
-    bachelier_result = bachelier_formula(DIM, T_total, s, K)
-    print(f"Bachelier formula: C = {bachelier_result:.6f}")
+    # bachelier_result = bachelier_formula(DIM, T_total, s, K)
+    # print(f"Bachelier formula: C = {bachelier_result:.6f}")
 
-    error = C_MC - bachelier_result
-    print(f"Error: {error:.6f}")
+    # error = C_MC - bachelier_result
+    # print(f"Error: {error:.6f}")
 
     # --Monte Carlo Simulation Error Approximation With Different Number Of Paths
-    C_bachelier = bachelier_formula(DIM, T_total, s, K)
+    # C_bachelier = bachelier_formula(DIM, T_total, s, K)
 
-    N_max   = 100_000
-    i_list         = []
-    C_estimates    = []
-    error_estimates = []
-    cum_payoff     = 0.0
+    # N_max   = 100_000
+    # i_list         = []
+    # C_estimates    = []
+    # error_estimates = []
+    # cum_payoff     = 0.0
 
-    for i in range(1, N_max + 1):
-        path   = simulate_path(T_total, S)
-        payoff = max(path[-1]['end'].mean() - K, 0)
-        cum_payoff += payoff
+    # for i in range(1, N_max + 1):
+    #     path   = simulate_path(T_total, S)
+    #     payoff = max(path[-1]['end'].mean() - K, 0)
+    #     cum_payoff += payoff
 
-        exp  = math.floor(math.log10(max(i-1, 1))) - 2
-        step = 10 ** max(exp + 1, 1)
+    #     exp  = math.floor(math.log10(max(i-1, 1))) - 2
+    #     step = 10 ** max(exp + 1, 1)
 
-        if i % step == 0:
-            C_hat = cum_payoff / i
-            i_list.append(i)
-            C_estimates.append(C_hat)
-            error_estimates.append(abs(C_hat - C_bachelier))
-            print(f"N={i:8d} → Ĉ = {C_hat:.6f}, error = {error_estimates[-1]:.6f}")
+    #     if i % step == 0:
+    #         C_hat = cum_payoff / i
+    #         i_list.append(i)
+    #         C_estimates.append(C_hat)
+    #         error_estimates.append(abs(C_hat - C_bachelier))
+    #         print(f"N={i:8d} → Ĉ = {C_hat:.6f}, error = {error_estimates[-1]:.6f}")
 
-    # ─── Plotting ──────────────────────────────────────────────────
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(6, 8))
+    # # ─── Plotting ──────────────────────────────────────────────────
+    # fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(6, 8))
 
-    # Convergence of Ĉ
-    ax1.plot(i_list, C_estimates, 'o-', label='MC estimate')
-    ax1.hlines(C_bachelier, i_list[0], i_list[-1],
-            colors='k', linestyles='--', label='Bachelier price')
-    ax1.set_xscale('log')
-    ax1.set_ylabel('C estimate')
-    ax1.set_title('Convergence of $\\hat C$ vs. $N$')
-    ax1.legend()
+    # # Convergence of Ĉ
+    # ax1.plot(i_list, C_estimates, 'o-', label='MC estimate')
+    # ax1.hlines(C_bachelier, i_list[0], i_list[-1],
+    #         colors='k', linestyles='--', label='Bachelier price')
+    # ax1.set_xscale('log')
+    # ax1.set_ylabel('C estimate')
+    # ax1.set_title('Convergence of $\\hat C$ vs. $N$')
+    # ax1.legend()
 
-    # Absolute error vs N
-    ax2.plot(i_list, error_estimates, 's-', color='r', label='|$\\hat C$ − $C_B$|')
-    ax2.set_xscale('log')
-    ax2.set_xlabel('Number of paths $N$')
-    ax2.set_ylabel('Absolute error')
-    ax2.set_title('Error vs. $N$')
-    ax2.legend()
+    # # Absolute error vs N
+    # ax2.plot(i_list, error_estimates, 's-', color='r', label='|$\\hat C$ − $C_B$|')
+    # ax2.set_xscale('log')
+    # ax2.set_xlabel('Number of paths $N$')
+    # ax2.set_ylabel('Absolute error')
+    # ax2.set_title('Error vs. $N$')
+    # ax2.legend()
 
-    plt.tight_layout()
-    plt.show()
+    # plt.tight_layout()
+    # plt.show()
