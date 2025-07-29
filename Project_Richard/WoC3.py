@@ -6,9 +6,9 @@ from cdfs2 import build_cdfs
 from scipy.stats import norm
 from options_simulation import bachelier_formula
 
-T_total    = 1
+T_total    = 10
 DIM        = 2
-S          = 1
+S          = 0.9
 N_ZEROS    = 200
 INV_T_GRID = 2000
 INV_R_GRID = 2000
@@ -25,7 +25,7 @@ def simulate_path(T_total, S, max_segments=100):
     T_rem  = T_total
     center = np.full(DIM, s)
     path   = []
-    tol = 1e-3
+    tol = 1e-1
 
     for _ in range(max_segments):
         if T_rem <= tol:
@@ -111,29 +111,31 @@ def plot_path(path):
     ax0.set_aspect('equal')
     ax0.set_xlim(min(xs)-0.1, max(xs)+0.1)
     ax0.set_ylim(min(ys)-0.1, max(ys)+0.1)
-    ax0.set_title('Cylinders & Paths')
-    ax0.set_xlabel('X')
-    ax0.set_ylabel('Y')
+    ax0.set_title('WoC')
+    ax0.set_xlabel(r'$x_1$')
+    ax0.set_ylabel(r'$x_2$')
 
     u_vals = [s['u'] for s in path]
     t_cum  = np.cumsum([s['tau'] for s in path])
     idx    = np.arange(1, len(path)+1)
-    ax1.plot(idx, u_vals, 'o-',  label='u_i')
-    ax1.plot(idx, t_cum,  's--', label='cumul. time')
+    ax1.plot(idx, u_vals, 'o-',  label=r'$\tau_i$: hitting time to sphere')
+    ax1.plot(idx, t_cum,  's--', label=r'$\sum\tau_i$')
     ax1.set_xticks(idx)
-    ax1.set_xlabel('Segment Index')
-    ax1.set_ylabel('Value')
-    ax1.set_title('Uniforms & Cumul. Time')
+    ax1.set_ylim([0,1.1*T_total]);
+    ax1.set_xlabel(r'$\#$ spheres')
+    ax1.set_ylabel(r'$t$')
+    ax1.set_title(r'Hitting times and cumulative times to $T$')
     ax1.legend()
 
     plt.tight_layout()
+    plt.show()
 
 if __name__=='__main__':
     #---One Simulation---
-    path = simulate_path(T_total, S)
-    for i, seg in enumerate(path, 1):
-        print(f"Seg {i}: R={seg['R']:.3f}, τ_phys={seg['tau']:.4e}, survived={seg['survived']}")
-    plot_path(path)
+    # path = simulate_path(T_total, S)
+    # for i, seg in enumerate(path, 1):
+    #     print(f"Seg {i}: R={seg['R']:.3f}, τ_phys={seg['tau']:.4e}, survived={seg['survived']}")
+    # plot_path(path)
 
 #     # # ---Many Simulations--- (Mean, Variance, ...)
     # N = 100000
@@ -177,8 +179,8 @@ if __name__=='__main__':
     #     plt.title(f"{name}_T")
     # plt.show()
 
-#     # --Monte Carlo Simulations--
-    # N = 100_000
+    # --Monte Carlo Simulations--
+    # N = 1_000_000
     # final_positions = np.zeros((N,2))
     # for i in range(N):
     #     if(i % 1000 == 0):
