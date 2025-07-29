@@ -12,8 +12,8 @@ S          = 1
 N_ZEROS    = 200
 INV_T_GRID = 2000
 INV_R_GRID = 2000
-K          = 1.1
-s          = 1
+K          = 112
+s          = 104
 
 zeros = get_bessel_zeros(DIM, N_ZEROS)
 (sp_r, cdf_r_star, p_surv0), (sp_t, raw_cdf_t_star) = build_cdfs(
@@ -130,22 +130,22 @@ def plot_path(path):
 
 if __name__=='__main__':
     #---One Simulation---
-    # path = simulate_path(T_total, S)
-    # for i, seg in enumerate(path, 1):
-    #     print(f"Seg {i}: R={seg['R']:.3f}, τ_phys={seg['tau']:.4e}, survived={seg['survived']}")
-    # plot_path(path)
+    path = simulate_path(T_total, S)
+    for i, seg in enumerate(path, 1):
+        print(f"Seg {i}: R={seg['R']:.3f}, τ_phys={seg['tau']:.4e}, survived={seg['survived']}")
+    plot_path(path)
 
-    #---Many Simulations--- (Mean, Variance, ...)
+#     # # ---Many Simulations--- (Mean, Variance, ...)
     # N = 100000
     # final_positions = np.zeros((N, 2))
-    # # segment_counts  = np.zeros(N, dtype=int)
+    # segment_counts  = np.zeros(N, dtype=int)
 
     # for i in range(N):
     #     if(i % 100 == 0):
     #         print(i)
-        # path = simulate_path(T_total, S)
-        # final_positions[i] = path[-1]['end']
-        # segment_counts[i]  = len(path)
+    #     path = simulate_path(T_total, S)
+    #     final_positions[i] = path[-1]['end']
+    #     segment_counts[i]  = len(path)
 
     # mean_pos = final_positions.mean(axis=0)        
     # var_pos  = final_positions.var(axis=0)           
@@ -177,8 +177,8 @@ if __name__=='__main__':
     #     plt.title(f"{name}_T")
     # plt.show()
 
-    # --Monte Carlo Simulations--
-    # N = 1_000_000
+#     # --Monte Carlo Simulations--
+    # N = 100_000
     # final_positions = np.zeros((N,2))
     # for i in range(N):
     #     if(i % 1000 == 0):
@@ -201,7 +201,7 @@ if __name__=='__main__':
     # --Monte Carlo Simulation Error Approximation With Different Number Of Paths
     # C_bachelier = bachelier_formula(DIM, T_total, s, K)
 
-    # N_max   = 1_000_000
+    # N_max   = 100_000
     # i_list         = []
     # C_estimates    = []
     # error_estimates = []
@@ -243,4 +243,4 @@ if __name__=='__main__':
     # ax2.legend()
 
     # plt.tight_layout()
-    # plt.show()
+    plt.show()
