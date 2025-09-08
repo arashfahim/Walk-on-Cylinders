@@ -9,7 +9,7 @@ from options_simulation import bachelier_formula
 T_total    = 1.0
 DIM        = 4
 # Choose R so that T_total/R^2 = S = DIM  ⇒ R = √(T_total/DIM)
-S          = DIM
+S          = DIM #Whe is S=DIM?
 
 N_ZEROS    = 200     # increase for accuracy
 INV_R      = 500
