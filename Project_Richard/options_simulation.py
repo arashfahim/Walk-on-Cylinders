@@ -3,7 +3,7 @@ from scipy.stats import norm
 
 def bachelier_formula(DIM, T, s, K):
 # same parameters as your sim   
-    sigma   = np.sqrt(T/DIM)
+    sigma   = np.sqrt(T)
 
     d = (K - s) / sigma        
 

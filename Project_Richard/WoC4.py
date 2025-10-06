@@ -7,7 +7,7 @@ from options_simulation import bachelier_formula
 
 # ── PARAMETERS ──────────────────────────────────────────────────────────────
 T_total    = 1.0
-DIM        = 4
+DIM        = 1
 # Choose R so that T_total/R^2 = S = DIM  ⇒ R = √(T_total/DIM)
 S          = DIM #Why is S=DIM?
 
@@ -16,7 +16,7 @@ INV_R      = 500
 INV_T      = 500
 K          = 1.1
 s          = 1.0
-N_PATHS    = 100_000
+N_PATHS    = 1_000
 tol        = 1e-8
 
 # 1) Precompute zeros of J_{ν}, ν = DIM/2 - 1
@@ -75,7 +75,7 @@ def simulate_path(T_rem):
 def mc_option_price():
     payoffs = np.empty(N_PATHS)
     for i in range(N_PATHS):
-        if i and i % 10_000 == 0:
+        if i and i % 5_000 == 0:
             print(f"Simulated {i} paths…")
         final = simulate_path(T_total)
         payoffs[i] = max(final.mean() - K, 0)
