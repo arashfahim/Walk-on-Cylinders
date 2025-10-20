@@ -6,7 +6,7 @@ def build_cdfs(dim, S, zeros, INV_R=2000, INV_T=2000):
     x   = np.asarray(zeros)
     lam = x**2 / 2            # eigenvalues of (1/2)Δ on unit ball
 
-    # 1) dimensionless grids
+    # 1)  grids on time and radius
     r_star = np.linspace(0.0, 1.0, INV_R)
     t_star = np.linspace(0.0, 1.0, INV_T)
 

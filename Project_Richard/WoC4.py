@@ -11,12 +11,12 @@ DIM        = 1
 # Choose R so that T_total/R^2 = S = DIM  ⇒ R = √(T_total/DIM)
 S          = DIM #Why is S=DIM?
 
-N_ZEROS    = 200     # increase for accuracy
-INV_R      = 500
-INV_T      = 500
+N_ZEROS    = 20     # increase for accuracy
+INV_R      = 50
+INV_T      = 50
 K          = 1.1
 s          = 1.0
-N_PATHS    = 1_000
+N_PATHS    = 10_000
 tol        = 1e-8
 
 # 1) Precompute zeros of J_{ν}, ν = DIM/2 - 1
