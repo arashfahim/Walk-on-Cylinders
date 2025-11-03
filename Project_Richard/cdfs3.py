@@ -2,7 +2,7 @@ import numpy as np
 from scipy.special import jv
 
 def build_cdfs(dim, S, zeros, INV_R=2000, INV_T=2000):
-    ν   = dim/2 - 1
+    nu   = dim/2 - 1
     x   = np.asarray(zeros)
     lam = x**2 / 2            # eigenvalues of (1/2)Δ on unit ball
 
@@ -11,16 +11,16 @@ def build_cdfs(dim, S, zeros, INV_R=2000, INV_T=2000):
     t_star = np.linspace(0.0, 1.0, INV_T)
 
     # 2) modal prefactors
-    A_den = 2.0 / (x * jv(ν+1, x))         # time‐series coefficient
-    A_num = 2.0 / (x * (jv(ν+1, x)**2))    # space‐series coefficient
+    A_den = 2.0 / (x * jv(nu+1, x))         # time‐series coefficient
+    A_num = 2.0 / (x * (jv(nu+1, x)**2))    # space‐series coefficient
 
     # 3) exponentials at full step S
     expS = np.exp(-lam * S)                # e^{-λ_n S}
 
     # 4) build unnormalized *spatial* numerator on r* grid
-    #    N(r*) = Σ_n [ A_num[n]·expS[n]·J_{ν+1}(x_n·r*)·(r*)^{ν+1} ]
-    Jp1    = jv(ν+1, np.outer(x, r_star))   # shape (N_roots, INV_R)
-    rwt    = r_star[None,:]**(ν+1)          # (r*)^{ν+1}
+    #    N(r*) = Σ_n [ A_num[n]·expS[n]·J_{nu+1}(x_n·r*)·(r*)^{nu+1} ]
+    Jp1    = jv(nu+1, np.outer(x, r_star))   # shape (N_roots, INV_R)
+    rwt    = r_star[None,:]**(nu+1)          # (r*)^{nu+1}
     num    = (A_num[:,None] * expS[:,None]) * Jp1 * rwt
     cdf_num = num.sum(axis=0)
 
