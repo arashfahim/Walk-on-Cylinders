@@ -10,16 +10,16 @@ import numpy as np
 from concurrent.futures import ProcessPoolExecutor
 import multiprocessing as mp
 
-from Bessel_zeroes import get_bessel_zeros
+from bessel_zeros import get_bessel_zeros
 from CDFs3_working import build_cdfs as _build_cdfs
 from bachelier_options import bachelier_formula
 
 # ── PARAMETERS ──────────────────────────────────────────────────────────────
 T_total = 1.0
-DIM     = 2
+DIM     = 4
 S       = DIM  # cylinder nondimensional step
 
-N_ZEROS = 1000
+N_ZEROS = 10
 INV_R   = 2000
 INV_T   = 2000
 K       = 1.1
@@ -27,8 +27,7 @@ s       = 1.0
 N_PATHS = 200_000
 tol     = 1e-8
 _eps    = np.finfo(np.float64).eps
-
-
+print(f"Using DIM={DIM}, S={S}, N_ZEROS={N_ZEROS}, INV_R={INV_R}, INV_T={INV_T}, N_PATHS={N_PATHS}")
 # ── Helpers ─────────────────────────────────────────────────────────────────
 def build_cdfs_checked(dim, S, zeros, INV_R, INV_T):
     out = _build_cdfs(dim, S, zeros, INV_R, INV_T)
@@ -45,12 +44,15 @@ def build_cdfs_checked(dim, S, zeros, INV_R, INV_T):
 
 
 # 1) Bessel zeros
+print("Computing Bessel function zeros…")
 zeros = get_bessel_zeros(DIM, N_ZEROS)
+print(f" Retrieved {len(zeros)} zeros for ν={DIM/2 -1}")
 
 # 2) Build CDFs (validated)
 r_star, cdf_r, p_surv0, t_star, raw_t = build_cdfs_checked(DIM, S, zeros, INV_R, INV_T)
 p_surv0 = float(np.clip(p_surv0, 0.0, 1.0))
 p_exit0 = 1.0 - p_surv0
+print(f"  Survival Probability p_surv0 = {p_surv0:.6e}, Exit Probability p_exit0 = {p_exit0:.6e}")
 
 # 3) Precompute inverse-CDF lookup tables (ensure monotone)
 u_r = np.linspace(0.0, 1.0, INV_R)
@@ -64,7 +66,7 @@ if p_exit0 > 0.0:
 else:
     t_star_inv = np.zeros_like(u_t)
 
-
+print
 # ── Core simulation (unchanged logic) ───────────────────────────────────────
 def simulate_path(T_rem: float) -> np.ndarray:
     center = np.full(DIM, s, dtype=np.float64)
@@ -174,13 +176,13 @@ def mc_option_price_parallel(n_paths: int, n_workers: int | None = None, batch: 
 
 # ── Main ────────────────────────────────────────────────────────────────────
 if __name__ == '__main__':
-    USE_PARALLEL = True  # toggle to False to use single-core version
-
+    USE_PARALLEL = False  # toggle to False to use single-core version
+    t0 = time.time()
     if USE_PARALLEL:
         C_MC = mc_option_price_parallel(N_PATHS, n_workers=None, batch=50_000)
     else:
         C_MC = mc_option_price()
-
+    print(f"Monte Carlo simulation completed in {time.time() - t0:.2f} seconds.")
     C_Bachelier = bachelier_formula(DIM, T_total, s, K)
     print(f"Monte Carlo price: {C_MC:.6f}")
     print(f"Bachelier formula: {C_Bachelier:.6f}")
