@@ -16,7 +16,7 @@ from bachelier_options import bachelier_formula
 
 # ── PARAMETERS ──────────────────────────────────────────────────────────────
 T_total = 1.0
-DIM     = 4
+DIM     = 10
 S       = DIM  # cylinder nondimensional step
 
 N_ZEROS = 10
@@ -176,7 +176,7 @@ def mc_option_price_parallel(n_paths: int, n_workers: int | None = None, batch: 
 
 # ── Main ────────────────────────────────────────────────────────────────────
 if __name__ == '__main__':
-    USE_PARALLEL = False  # toggle to False to use single-core version
+    USE_PARALLEL = True  # toggle to False to use single-core version
     t0 = time.time()
     if USE_PARALLEL:
         C_MC = mc_option_price_parallel(N_PATHS, n_workers=None, batch=50_000)
