@@ -11,14 +11,14 @@ def build_cdfs(dim, S, zeros, INV_R=2000, INV_T=2000):
     nu  = dim/2.0 - 1.0
     x   = np.asarray(zeros, dtype=np.float64)                 # z_{ν,n}
     
-    lam = (x*x) / 2.0                                         # eigenvalues of (1/2)Δ on unit ball
+    lam = (x*x) / 2.0    # eigenvalues of (1/2)Δ on unit ball = z_{ν,n}^2 / 2
 
     # grids: keep uniform to preserve your API/behavior
     r_star = np.linspace(0.0, 1.0, int(INV_R), dtype=np.float64)
     t_star = np.linspace(0.0, 1.0, int(INV_T), dtype=np.float64)
 
     # ----- stable J_{ν+1}(z_{ν,n}) at roots via derivative identity -----
-    # At zeros of J_ν, we have J_{ν+1}(z) = - J'_ν(z)
+    # At zeros of J_ν, we have J_{ν+1}(z) = - J'_ν(z) [Watson treatise page 45 (4)]
     Jnu1_roots = -jvp(nu, x, 1)  # derivative w.r.t. argument
 
     # ----- weights (temporal & spatial) -----
