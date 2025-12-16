@@ -42,9 +42,6 @@ def build_cdfs(dim, S, zeros, INV_R=2000, INV_T=2000):
     # (If your zeros/ordering create alternating signs numerically, taking abs here is the safe practical choice.)
     logA_den_mag = logA_den  # magnitude in log-domain (we treat terms as positive in the survival/time sums)
 
-    # A_num = 2 / ( x [J_{ν+1}(x)]^2 )
-    # Use derivative-based J_{ν+1} at roots for stability:
-    A_num = 2.0 / (np.maximum(x, eps) * np.maximum(Jnu1_roots*Jnu1_roots, eps))
 
     # ----- exponentials for full nondimensional step S -----
     expS = np.exp(-lam * S)  # e^{- (z^2/2) S }
@@ -54,12 +51,15 @@ def build_cdfs(dim, S, zeros, INV_R=2000, INV_T=2000):
     # => log terms = logA_den_mag - lam*S
     log_terms_surv = logA_den_mag - lam * S
     m = np.max(log_terms_surv)
-    p_surv0 = float(np.exp(m) * np.sum(np.exp(log_terms_surv - m)))
+    p_surv0 = float(np.exp(m) * np.sum(sign_A_den*np.exp(log_terms_surv - m))) #Here is where sign_A_den is multiplied back in.
     # Guard against complete underflow
     if not np.isfinite(p_surv0) or p_surv0 <= 0.0:
         p_surv0 = 0.0
 
     # ----- spatial numerator (Case 2) with columnwise scaling (handles sign + magnitude) -----
+    # A_num = 2 / ( x [J_{ν+1}(x)]^2 )
+    # Use derivative-based J_{ν+1} at roots for stability:
+    A_num = np.maximum(x, eps)**(nu-1) / np.maximum(Jnu1_roots*Jnu1_roots, eps)
     # F_unnorm(ρ) = Σ_n [ A_num[n] · (r*)^{ν+1} · J_{ν+1}(x_n r*) · e^{- (z_n^2/2) S} ]
     # Compute J_{ν+1}(x r*) on outer grid:
     Jp1 = jv(nu + 1.0, np.outer(x, r_star))  # shape (N_roots, INV_R)
@@ -67,13 +67,13 @@ def build_cdfs(dim, S, zeros, INV_R=2000, INV_T=2000):
     # radial weight
     rwt = r_star[None, :]**(nu + 1.0)
     # terms matrix, shape (N_roots, INV_R)
-    terms = (A_num[:, None] * expS[:, None]) * Jp1 * rwt
+    terms = (A_num[:, None] * expS[:, None]) * Jp1 
 
     # Columnwise scaled summation to avoid overflow/underflow while keeping signs:
     scale = np.max(np.abs(terms), axis=0)
     safe_scale = np.where(scale > 0.0, scale, 1.0)
     sum_scaled = np.sum(terms / safe_scale, axis=0, dtype=np.float64)
-    cdf_num = sum_scaled * safe_scale
+    cdf_num = coef*sum_scaled * safe_scale* rwt
 
     # ----- conditional spatial CDF -----
     if p_surv0 > 0.0:
@@ -87,15 +87,13 @@ def build_cdfs(dim, S, zeros, INV_R=2000, INV_T=2000):
     cdf_r = np.maximum.accumulate(cdf_r)
 
     # ----- raw exit-time CDF on t* grid with log-sum-exp -----
-    # raw_t(t*) = 1 - Σ_n A_den * e^{-lam*S*t*}
+    # raw_t(t*) = 1 - Σ_n A_den * e^{-lam*S*t}
     # Vectorized log-sum-exp across n for each t*
     log_terms_time = logA_den_mag[:, None] - (lam[:, None] * (S * t_star[None, :]))
     m_t = np.max(log_terms_time, axis=0)
-    sum_time = np.exp(m_t) * np.sum(np.exp(log_terms_time - m_t[None, :]), axis=0)
-    raw_t = 1.0 - sum_time
-
-    # numerical hygiene
+    sum_time = np.exp(m_t) * np.sum(sign_A_den[:,None]*np.exp(log_terms_time - m_t[None, :]), axis=0)
+    raw_t = (1.0 - sum_time)/(1-p_surv0)
     raw_t = np.clip(raw_t, 0.0, 1.0)
-    raw_t = np.maximum.accumulate(raw_t)
+    raw_t = np.minimum.accumulate(raw_t[::-1])[::-1]
 
     return r_star, cdf_r, p_surv0, t_star, raw_t
