@@ -20,9 +20,9 @@ import seaborn as sns
 
 # ── PARAMETERS ──────────────────────────────────────────────────────────────
 T_total = 10.0
-DIM     = 10
-S       = [0.05*i for i in range(1,5)]  # cylinder nondimensional step
-N_ZEROS = 10
+DIM     = 15
+S       = [0.005*i for i in range(1,5)]  # cylinder nondimensional step
+N_ZEROS = 200
 INV_R   = 2000
 INV_T   = 2000
 K       = 1.1
@@ -36,6 +36,7 @@ def simulate_whole_path(T_rem: float,s_:float) -> np.ndarray:
     center = np.full(DIM, s_, dtype=np.float64)
     t_0 = 0
     path = np.insert(center, 0, t_0)[None,:]
+    i = 0
     while True:
         if T_rem <= tol:
             return path
@@ -61,6 +62,7 @@ def simulate_whole_path(T_rem: float,s_:float) -> np.ndarray:
             T_rem  -= tau
             t_0 += tau
             path = np.concatenate((path,np.insert(center,0,t_0)[None,:]), axis = 0)
+            i += tau
             continue
 
         if p_surv0 >= 1.0 - 1e-15:
