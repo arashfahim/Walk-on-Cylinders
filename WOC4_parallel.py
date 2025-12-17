@@ -16,8 +16,8 @@ from bachelier_options import bachelier_formula
 
 # ── PARAMETERS ──────────────────────────────────────────────────────────────
 T_total = 1.0
-DIM     = 5
-S       = 1.0  # cylinder nondimensional step
+DIM     = 10
+S       = 1.0/np.sqrt(DIM)  # cylinder nondimensional step
 N_ZEROS = 10
 INV_R   = 2000
 INV_T   = 2000
