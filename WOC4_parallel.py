@@ -16,15 +16,14 @@ from bachelier_options import bachelier_formula
 
 # ── PARAMETERS ──────────────────────────────────────────────────────────────
 T_total = 1.0
-DIM     = 10
-S       = DIM  # cylinder nondimensional step
-
+DIM     = 5
+S       = 1.0  # cylinder nondimensional step
 N_ZEROS = 10
 INV_R   = 2000
 INV_T   = 2000
 K       = 1.1
-s       = 1.0
-N_PATHS = 200_000
+s       = 1.0 #the components of the starting point considered all the same!
+N_PATHS = 100_000
 tol     = 1e-8
 _eps    = np.finfo(np.float64).eps
 print(f"Using DIM={DIM}, S={S}, N_ZEROS={N_ZEROS}, INV_R={INV_R}, INV_T={INV_T}, N_PATHS={N_PATHS}")
@@ -186,4 +185,4 @@ if __name__ == '__main__':
     C_Bachelier = bachelier_formula(DIM, T_total, s, K)
     print(f"Monte Carlo price: {C_MC:.6f}")
     print(f"Bachelier formula: {C_Bachelier:.6f}")
-    print(f"Relative Error:             {(C_MC - C_Bachelier)/C_Bachelier:.6f}")
+    print(f"Relative Error:             {100*(C_MC - C_Bachelier)/C_Bachelier:.6f} %")

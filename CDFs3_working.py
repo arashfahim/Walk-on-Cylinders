@@ -65,15 +65,15 @@ def build_cdfs(dim, S, zeros, INV_R=2000, INV_T=2000):
     Jp1 = jv(nu + 1.0, np.outer(x, r_star))  # shape (N_roots, INV_R)
 
     # radial weight
-    rwt = r_star[None, :]**(nu + 1.0)
+    rwt = r_star**(nu + 1.0)
     # terms matrix, shape (N_roots, INV_R)
     terms = (A_num[:, None] * expS[:, None]) * Jp1 
-
     # Columnwise scaled summation to avoid overflow/underflow while keeping signs:
     scale = np.max(np.abs(terms), axis=0)
     safe_scale = np.where(scale > 0.0, scale, 1.0)
     sum_scaled = np.sum(terms / safe_scale, axis=0, dtype=np.float64)
     cdf_num = coef*sum_scaled * safe_scale* rwt
+    
 
     # ----- conditional spatial CDF -----
     if p_surv0 > 0.0:
