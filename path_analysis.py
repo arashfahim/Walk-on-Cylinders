@@ -20,8 +20,8 @@ import seaborn as sns
 
 # ── PARAMETERS ──────────────────────────────────────────────────────────────
 T_total = 10.0
-DIM     = 20
-S       = [0.2*i for i in range(1, 11)]  # cylinder nondimensional step
+DIM     = 10
+S       = [0.05*i for i in range(1,5)]  # cylinder nondimensional step
 N_ZEROS = 10
 INV_R   = 2000
 INV_T   = 2000
