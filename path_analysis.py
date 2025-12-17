@@ -20,7 +20,7 @@ import seaborn as sns
 
 # ── PARAMETERS ──────────────────────────────────────────────────────────────
 T_total = 10.0
-DIM     = 5
+DIM     = 10
 S       = [0.2*i for i in range(1, 11)]  # cylinder nondimensional step
 N_ZEROS = 10
 INV_R   = 2000
@@ -129,7 +129,7 @@ for s_ in S:
     length = np.array(length)
     path_dict[s_] = length.tolist()
     
-with open(r"path_length_{DIM}.json", "w") as json_file:
+with open(f"path_length_{DIM}.json", "w") as json_file:
     json.dump(path_dict, json_file, indent=4) 
     # # Plotting the histogram
     # _, counts = np.unique(length, return_counts=True)
