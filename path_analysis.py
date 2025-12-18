@@ -26,14 +26,14 @@ N_ZEROS = 200
 INV_R   = 2000
 INV_T   = 2000
 K       = 1.1
-s       = 1.0
+s       = 0.0
 N_PATHS = 50_000
 tol     = 1e-8
-_eps    = np.finfo(np.float64).eps
+_eps    = np.finfo(np.float64).eps # small number to avoid division by zero
 nu  = DIM/2.0 - 1.0
 
-def simulate_whole_path(T_rem: float,s_:float) -> np.ndarray:
-    center = np.full(DIM, s_, dtype=np.float64)
+def simulate_whole_path(T_rem: float,s:float) -> np.ndarray:
+    center = np.full(DIM, s, dtype=np.float64)
     t_0 = 0
     path = np.insert(center, 0, t_0)[None,:]
     i = 0
@@ -48,9 +48,9 @@ def simulate_whole_path(T_rem: float,s_:float) -> np.ndarray:
         direction = np.random.normal(size=DIM)
         nrm = np.linalg.norm(direction)
         if nrm <= _eps:
-            direction = np.zeros(DIM); direction[0] = 1.0
+            direction = np.zeros(DIM); direction[0] = 1.0 # degenerate case
         else:
-            direction /= nrm
+            direction /= nrm # a point on unit sphere
 
         # Degenerate guards first
         if p_surv0 <= 0.0:
@@ -123,7 +123,7 @@ for s_ in S:
     for i in range(N_PATHS):
         # if i and (i % 25_000 == 0):
         #     print(f"Simulated {i} paths…")
-        sample_paths.append(simulate_whole_path(T_total,s_))
+        sample_paths.append(simulate_whole_path(T_total,s))
                 
     length = []
     for s in sample_paths:

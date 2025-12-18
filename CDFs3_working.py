@@ -92,8 +92,12 @@ def build_cdfs(dim, S, zeros, INV_R=2000, INV_T=2000):
     log_terms_time = logA_den_mag[:, None] - (lam[:, None] * (S * t_star[None, :]))
     m_t = np.max(log_terms_time, axis=0)
     sum_time = np.exp(m_t) * np.sum(sign_A_den[:,None]*np.exp(log_terms_time - m_t[None, :]), axis=0)
-    raw_t = (1.0 - sum_time)/(1-p_surv0)
-    raw_t = np.clip(raw_t, 0.0, 1.0)
-    raw_t = np.minimum.accumulate(raw_t[::-1])[::-1]
+    raw_t_num = 1.0 - sum_time
+    raw_t_num = np.minimum.accumulate(raw_t_num[::-1])[::-1]
+    raw_t_num = np.clip(raw_t_num, 0.0, 1-p_surv0)
+    if p_surv0 >= 1.0:
+        raw_t = np.zeros_like(raw_t_num)
+    else:
+        raw_t = raw_t_num/(1-p_surv0)
 
     return r_star, cdf_r, p_surv0, t_star, raw_t
