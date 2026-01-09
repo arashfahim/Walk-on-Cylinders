@@ -21,19 +21,19 @@ import seaborn as sns
 # ── PARAMETERS ──────────────────────────────────────────────────────────────
 T_total = 10.0
 DIM     = 15
-S       = [0.005*i for i in range(1,5)]  # cylinder nondimensional step
+S       = [0.005*i for i in range(1,50)]  # cylinder nondimensional step
 N_ZEROS = 200
 INV_R   = 2000
 INV_T   = 2000
 K       = 1.1
-s       = 0.0
+# s       = 0.0
 N_PATHS = 50_000
 tol     = 1e-8
 _eps    = np.finfo(np.float64).eps # small number to avoid division by zero
 nu  = DIM/2.0 - 1.0
 
-def simulate_whole_path(T_rem: float,s:float) -> np.ndarray:
-    center = np.full(DIM, s, dtype=np.float64)
+def simulate_whole_path(T_rem: float,s_:float) -> np.ndarray:
+    center = np.full(DIM, s_, dtype=np.float64)
     t_0 = 0
     path = np.insert(center, 0, t_0)[None,:]
     i = 0
@@ -123,7 +123,7 @@ for s_ in S:
     for i in range(N_PATHS):
         # if i and (i % 25_000 == 0):
         #     print(f"Simulated {i} paths…")
-        sample_paths.append(simulate_whole_path(T_total,s))
+        sample_paths.append(simulate_whole_path(T_total,s_))
                 
     length = []
     for s in sample_paths:
