@@ -20,7 +20,7 @@ import seaborn as sns
 
 # ── PARAMETERS ──────────────────────────────────────────────────────────────
 T_total = 10.0
-DIM     = 15
+DIM     = 20
 S       = [0.005*i for i in range(1,50)]  # cylinder nondimensional step
 N_ZEROS = 200
 INV_R   = 2000
@@ -93,6 +93,7 @@ def simulate_whole_path(T_rem: float,s_:float) -> np.ndarray:
             path = np.concatenate((path,np.insert(center,0,t_0)[None,:]), axis = 0)
 
 path_dict = {}
+p_exit = {}
 for s_ in S:
     print(f"Running for S = {s_} ...")
     # 1) Bessel zeros
@@ -130,9 +131,12 @@ for s_ in S:
         length.append(s.shape[0])
     length = np.array(length)
     path_dict[s_] = length.tolist()
+    p_exit[s_] = p_exit0
     
 with open(f"path_length_{DIM}.json", "w") as json_file:
     json.dump(path_dict, json_file, indent=4) 
+with open(f"p_exit_{DIM}.json", "w") as json_file:
+    json.dump(p_exit, json_file, indent=4) 
     # # Plotting the histogram
     # _, counts = np.unique(length, return_counts=True)
     # # Find the maximum frequency
