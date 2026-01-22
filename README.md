@@ -24,4 +24,4 @@ We implemented a closed-form solution to the option pricing in `bachelier_option
 ```
 from bachelier_options import bachelier_formula
 ```
-
+A draft of the reseach paper is coming soon and ArXiV.
