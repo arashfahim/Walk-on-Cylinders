@@ -5,7 +5,6 @@ import numpy as np
 import json
 from concurrent.futures import ProcessPoolExecutor
 import multiprocessing as mp
-from bessel_zeros import get_bessel_zeros
 from scipy.special import jv, jvp, gamma, loggamma
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as font_manager
@@ -16,21 +15,20 @@ plt.rc('text.latex', preamble=r'\usepackage{amsmath}')
 
 from bessel_zeros import get_bessel_zeros
 from CDFs3_working import build_cdfs as build_cdfs
-import seaborn as sns
 
 # ── PARAMETERS ──────────────────────────────────────────────────────────────
-T_total = 10.0
-DIM     = 20
-S       = [0.005*i for i in range(1,50)]  # cylinder nondimensional step
-N_ZEROS = 200
-INV_R   = 2000
-INV_T   = 2000
+T_total = 10.0 # Terminal horizon
+DIM     = 20 # dimension
+S       = [0.005*i for i in range(1,50)]  # cylinder scaling parameter
+N_ZEROS = 200 # number of terms in the Fourier-Bessel series
+INV_R   = 2000 # table for inverse distribution function for distance
+INV_T   = 2000 # table for inverse distribution function for time
 K       = 1.1
 # s       = 0.0
-N_PATHS = 50_000
-tol     = 1e-8
+N_PATHS = 50_000 # number of sample paths to simulate
+tol     = 0 # stopping criteria
 _eps    = np.finfo(np.float64).eps # small number to avoid division by zero
-nu  = DIM/2.0 - 1.0
+nu  = DIM/2.0 - 1.0 
 
 def simulate_whole_path(T_rem: float,s_:float) -> np.ndarray:
     center = np.full(DIM, s_, dtype=np.float64)

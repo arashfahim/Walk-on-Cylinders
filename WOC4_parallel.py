@@ -15,17 +15,17 @@ from CDFs3_working import build_cdfs as _build_cdfs
 from bachelier_options import bachelier_formula
 
 # ── PARAMETERS ──────────────────────────────────────────────────────────────
-T_total = 1.0
-DIM     = 25
-S       = 1.0/np.sqrt(DIM)  # cylinder nondimensional step
-N_ZEROS = 10
-INV_R   = 2000
-INV_T   = 2000
-K       = 1.1
+T_total = 1.0 #terminal horizon
+DIM     = 25 #dimension
+S       = 1.0/np.sqrt(DIM)  # scaling parameter
+N_ZEROS = 10 # number of terms in the Fourier-Bessel series
+INV_R   = 2000 # table for inverse distribution function for distance
+INV_T   = 2000 # table for inverse distribution function for time
+K       = 1.1 #strike price
 s       = 1.0 #the components of the starting point considered all the same!
-N_PATHS = 100_000
-tol     = 1e-8
-_eps    = np.finfo(np.float64).eps
+N_PATHS = 100_000 # number of sample paths to simulate
+tol     = 1e-8 # stopping criteria
+_eps    = np.finfo(np.float64).eps # small number to avoid division by zero
 print(f"Using DIM={DIM}, S={S}, N_ZEROS={N_ZEROS}, INV_R={INV_R}, INV_T={INV_T}, N_PATHS={N_PATHS}")
 # ── Helpers ─────────────────────────────────────────────────────────────────
 def build_cdfs_checked(dim, S, zeros, INV_R, INV_T):
