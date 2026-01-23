@@ -20,6 +20,9 @@ N_PATHS = 100_000 # number of sample paths to simulate
 tol     = 1e-8 # stopping criteria
 _eps    = np.finfo(np.float64).eps # small number to avoid division by zero
 ```
+In `/Test/WOC_test.py`, we import proper packages from `/WoC`. The we use function `simulate_path` to simulate the paths of Brownian motion using WoC.
+In `Test/path_analysis.py`, similar function is defined to generate sample paths.
+
 We implemented a closed-form solution to the option pricing in `bachelier_options`. If you need to use the bench mark, add the following line:
 ```
 from bachelier_options import bachelier_formula
