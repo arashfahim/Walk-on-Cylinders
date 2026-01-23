@@ -30,7 +30,7 @@ tol     = 0 # stopping criteria
 _eps    = np.finfo(np.float64).eps # small number to avoid division by zero
 nu  = DIM/2.0 - 1.0 
 
-def simulate_whole_path(T_rem: float,s_:float) -> np.ndarray:
+def simulate_path(T_rem: float,s_:float) -> np.ndarray:
     center = np.full(DIM, s_, dtype=np.float64)
     t_0 = 0
     path = np.insert(center, 0, t_0)[None,:]
@@ -122,7 +122,7 @@ for s_ in S:
     for i in range(N_PATHS):
         # if i and (i % 25_000 == 0):
         #     print(f"Simulated {i} paths…")
-        sample_paths.append(simulate_whole_path(T_total,s_))
+        sample_paths.append(simulate_path(T_total,s_))
                 
     length = []
     for s in sample_paths:
