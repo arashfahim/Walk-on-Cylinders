@@ -14,11 +14,11 @@ plt.rc('text', usetex=True)
 plt.rc('text.latex', preamble=r'\usepackage{amsmath}')
 
 from bessel_zeros import get_bessel_zeros
-from CDFs3_working import build_cdfs as build_cdfs
+from CDFs import build_cdfs as build_cdfs
 
 # ── PARAMETERS ──────────────────────────────────────────────────────────────
 T_total = 10.0 # Terminal horizon
-DIM     = 20 # dimension
+DIM     = 2 # dimension
 S       = [0.005*i for i in range(1,50)]  # cylinder scaling parameter
 N_ZEROS = 200 # number of terms in the Fourier-Bessel series
 INV_R   = 2000 # table for inverse distribution function for distance

@@ -16,15 +16,15 @@ from bachelier_options import bachelier_formula
 
 # ── PARAMETERS ──────────────────────────────────────────────────────────────
 T_total = 1.0 #terminal horizon
-DIM     = 25 #dimension
-S       = 1.0/np.sqrt(DIM)  # scaling parameter
+DIM     = 10 #dimension
+S       = 25e-2  # scaling parameter
 N_ZEROS = 10 # number of terms in the Fourier-Bessel series
 INV_R   = 2000 # table for inverse distribution function for distance
 INV_T   = 2000 # table for inverse distribution function for time
 K       = 1.1 #strike price
 x       = np.full(DIM, 1., dtype=np.float64)# the starting point
 N_PATHS = 100_000 # number of sample paths to simulate
-tol     = 1e-8 # stopping criteria
+tol     = 0 # stopping criteria
 _eps    = np.finfo(np.float64).eps # small number to avoid division by zero
 print(f"Using DIM={DIM}, S={S}, N_ZEROS={N_ZEROS}, INV_R={INV_R}, INV_T={INV_T}, N_PATHS={N_PATHS}")
 # ── Helpers ─────────────────────────────────────────────────────────────────
@@ -65,9 +65,10 @@ if p_exit0 > 0.0:
 else:
     t_star_inv = np.zeros_like(u_t)
 
-print
+
 # ── Core simulation (unchanged logic) ───────────────────────────────────────
-def simulate_path(T_rem: float,center) -> np.ndarray:
+def simulate_path(T_rem: float,x_n) -> np.ndarray:
+    center = x_n.copy()
     while True:
         if T_rem <= tol:
             return center
@@ -145,7 +146,7 @@ def _worker_seed(seed_base: int):
 def _simulate_batch(n_batch: int) -> float:
     ssum = 0.0
     for _ in range(n_batch):
-        final = simulate_path(T_total)
+        final = simulate_path(T_total, x)
         ssum += max(final[0] - K, 0.0)
     return ssum
 
@@ -174,14 +175,14 @@ def mc_option_price_parallel(n_paths: int, n_workers: int | None = None, batch: 
 
 # ── Main ────────────────────────────────────────────────────────────────────
 if __name__ == '__main__':
-    USE_PARALLEL = True  # toggle to False to use single-core version
+    USE_PARALLEL = False  # toggle to False to use single-core version
     t0 = time.time()
     if USE_PARALLEL:
         C_MC = mc_option_price_parallel(N_PATHS, n_workers=None, batch=50_000)
     else:
         C_MC = mc_option_price()
     print(f"Monte Carlo simulation completed in {time.time() - t0:.2f} seconds.")
-    C_Bachelier = bachelier_formula(DIM, T_total, s, K)
+    C_Bachelier = bachelier_formula(DIM, T_total, x.mean(), K)
     print(f"Monte Carlo price: {C_MC:.6f}")
     print(f"Bachelier formula: {C_Bachelier:.6f}")
     print(f"Relative Error:             {100*(C_MC - C_Bachelier)/C_Bachelier:.6f} %")

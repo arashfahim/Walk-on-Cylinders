@@ -6,6 +6,7 @@ import math
 T_total = 1.0 #terminal horizon
 DIM     = 25 #dimension
 epsilon = 1e-4 # small threshold to stop
+x       = np.full(DIM, 1., dtype=np.float64)# the starting point
 _eps    = np.finfo(np.float64).eps # small number to avoid division by zero
 N_PATHS = 100_000 # number of sample paths to simulate
 
@@ -76,7 +77,9 @@ def simulate_path(T_rem: float,center) -> np.ndarray:
 if __name__ == '__main__':
     sample_paths = []
     for i in range(N_PATHS):
-        sample_paths.append(simulate_path(T_total,s_))
+        if (i % 10_000 == 0):
+            print(f"Simulated {i} paths…")
+        sample_paths.append(simulate_path(T_total,x))
 
 # Example usage for a 3D problem
 # d = 3
