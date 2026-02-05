@@ -34,10 +34,10 @@ def simulate_path(T_rem: float,s_:float) -> np.ndarray:
     center = np.full(DIM, s_, dtype=np.float64)
     t_0 = 0
     path = np.insert(center, 0, t_0)[None,:]
-    i = 0
     while True:
         if T_rem <= tol:
             return path
+        
 
         # R so that t* = T_rem/R^2 = S
         R = math.sqrt(max(T_rem, 0.0) / s_)
@@ -135,18 +135,3 @@ with open(f"path_length_{DIM}.json", "w") as json_file:
     json.dump(path_dict, json_file, indent=4) 
 with open(f"p_exit_{DIM}.json", "w") as json_file:
     json.dump(p_exit, json_file, indent=4) 
-    # # Plotting the histogram
-    # _, counts = np.unique(length, return_counts=True)
-    # # Find the maximum frequency
-    # highest_density = counts.max()/length.size
-    # f = plt.figure(figsize=(8, 5),dpi=200)
-    # sns.histplot(x=length, kde=True, bins=50,label='Path Lengths Histogram',stat= 'density')
-    # # plt.yscale('log')
-    # plt.vlines(np.mean(length),0,highest_density, color='red', linestyle='dashed', linewidth=2, label=f'Mean = {np.mean(length):.2f}')
-    # plt.xlabel('Number of Steps in Path', fontproperties=font)
-    # plt.ylabel('Frequency (log scale)', fontproperties=font)
-    # plt.title(f'Histogram of Path Lengths for $d={DIM}$ and $S={s_:.2f}$', fontproperties=font)
-    # plt.grid(True, which='both', linestyle='--', linewidth=0.5)
-    # plt.legend(prop=font)
-    # # plt.show()
-    # f.savefig(f'{DIM}_{s_:.2f}.pdf',format="pdf",dpi=600);

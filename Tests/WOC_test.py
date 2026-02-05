@@ -22,7 +22,7 @@ N_ZEROS = 10 # number of terms in the Fourier-Bessel series
 INV_R   = 2000 # table for inverse distribution function for distance
 INV_T   = 2000 # table for inverse distribution function for time
 K       = 1.1 #strike price
-s       = 1.0 #the components of the starting point considered all the same!
+x       = np.full(DIM, 1., dtype=np.float64)# the starting point
 N_PATHS = 100_000 # number of sample paths to simulate
 tol     = 1e-8 # stopping criteria
 _eps    = np.finfo(np.float64).eps # small number to avoid division by zero
@@ -67,8 +67,7 @@ else:
 
 print
 # ── Core simulation (unchanged logic) ───────────────────────────────────────
-def simulate_path(T_rem: float) -> np.ndarray:
-    center = np.full(DIM, s, dtype=np.float64)
+def simulate_path(T_rem: float,center) -> np.ndarray:
     while True:
         if T_rem <= tol:
             return center
@@ -123,7 +122,7 @@ def mc_option_price() -> float:
     for i in range(N_PATHS):
         if i and (i % 50_000 == 0):
             print(f"Simulated {i} paths…")
-        final = simulate_path(T_total)
+        final = simulate_path(T_total,x)
         payoffs[i] = max(final[0] - K, 0.0)
     return float(payoffs.mean())
 
