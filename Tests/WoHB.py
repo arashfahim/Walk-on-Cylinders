@@ -7,6 +7,7 @@ T_total = 1.0 #terminal horizon
 DIM     = 25 #dimension
 epsilon = 1e-4 # small threshold to stop
 _eps    = np.finfo(np.float64).eps # small number to avoid division by zero
+N_PATHS = 100_000 # number of sample paths to simulate
 
 
 def walk_on_heat_balls_step(t_n, x_n, d, epsilon):
@@ -69,6 +70,13 @@ def simulate_path(T_rem: float,center) -> np.ndarray:
             center = end
             path = np.concatenate((path,np.insert(center,0,t_0)[None,:]), axis = 0)   
 
+
+
+# ── Main ─────────────────
+if __name__ == '__main__':
+    sample_paths = []
+    for i in range(N_PATHS):
+        sample_paths.append(simulate_path(T_total,s_))
 
 # Example usage for a 3D problem
 # d = 3

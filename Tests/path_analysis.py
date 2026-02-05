@@ -24,14 +24,13 @@ N_ZEROS = 200 # number of terms in the Fourier-Bessel series
 INV_R   = 2000 # table for inverse distribution function for distance
 INV_T   = 2000 # table for inverse distribution function for time
 K       = 1.1
-# s       = 0.0
+x       = np.full(DIM, 0., dtype=np.float64)# the starting point
 N_PATHS = 50_000 # number of sample paths to simulate
 tol     = 0 # stopping criteria
 _eps    = np.finfo(np.float64).eps # small number to avoid division by zero
 nu  = DIM/2.0 - 1.0 
 
-def simulate_path(T_rem: float,s_:float) -> np.ndarray:
-    center = np.full(DIM, s_, dtype=np.float64)
+def simulate_path(T_rem: float,center:float) -> np.ndarray:
     t_0 = 0
     path = np.insert(center, 0, t_0)[None,:]
     while True:
@@ -122,7 +121,7 @@ for s_ in S:
     for i in range(N_PATHS):
         # if i and (i % 25_000 == 0):
         #     print(f"Simulated {i} paths…")
-        sample_paths.append(simulate_path(T_total,s_))
+        sample_paths.append(simulate_path(T_total,x))
                 
     length = []
     for s in sample_paths:
