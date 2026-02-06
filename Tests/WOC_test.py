@@ -16,14 +16,14 @@ from bachelier_options import bachelier_formula
 
 # ── PARAMETERS ──────────────────────────────────────────────────────────────
 T_total = 1.0 #terminal horizon
-DIM     = 10 #dimension
-S       = 25e-2  # scaling parameter
-N_ZEROS = 10 # number of terms in the Fourier-Bessel series
+DIM     = 20 #dimension
+S       = 25e-3  # scaling parameter
+N_ZEROS = 40 # number of terms in the Fourier-Bessel series
 INV_R   = 2000 # table for inverse distribution function for distance
 INV_T   = 2000 # table for inverse distribution function for time
-K       = 1.1 #strike price
-x       = np.full(DIM, 1., dtype=np.float64)# the starting point
-N_PATHS = 100_000 # number of sample paths to simulate
+x       = np.full(DIM, 100., dtype=np.float64)# the starting point
+K       = x.mean() #strike price
+N_PATHS = 50_000 # number of sample paths to simulate
 tol     = 0 # stopping criteria
 _eps    = np.finfo(np.float64).eps # small number to avoid division by zero
 print(f"Using DIM={DIM}, S={S}, N_ZEROS={N_ZEROS}, INV_R={INV_R}, INV_T={INV_T}, N_PATHS={N_PATHS}")
@@ -121,10 +121,12 @@ def simulate_path(T_rem: float,x_n) -> np.ndarray:
 def mc_option_price() -> float:
     payoffs = np.empty(N_PATHS, dtype=np.float64)
     for i in range(N_PATHS):
-        if i and (i % 50_000 == 0):
+        if i and (i % 100_000 == 0):
             print(f"Simulated {i} paths…")
         final = simulate_path(T_total,x)
-        payoffs[i] = max(final[0] - K, 0.0)
+        # print(len(final)-DIM)
+        payoffs[i] = max(sum(final)/DIM - K, 0.0)
+    print(payoffs.shape)
     return float(payoffs.mean())
 
 
@@ -147,7 +149,7 @@ def _simulate_batch(n_batch: int) -> float:
     ssum = 0.0
     for _ in range(n_batch):
         final = simulate_path(T_total, x)
-        ssum += max(final[0] - K, 0.0)
+        ssum += max(sum(final)/DIM-K, 0.0)
     return ssum
 
 
@@ -175,7 +177,7 @@ def mc_option_price_parallel(n_paths: int, n_workers: int | None = None, batch: 
 
 # ── Main ────────────────────────────────────────────────────────────────────
 if __name__ == '__main__':
-    USE_PARALLEL = False  # toggle to False to use single-core version
+    USE_PARALLEL = True  # toggle to False to use single-core version
     t0 = time.time()
     if USE_PARALLEL:
         C_MC = mc_option_price_parallel(N_PATHS, n_workers=None, batch=50_000)

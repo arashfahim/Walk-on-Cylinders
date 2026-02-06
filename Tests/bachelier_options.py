@@ -3,12 +3,12 @@ from scipy.stats import norm
 
 def bachelier_formula(DIM, T, s, K):
 # same parameters as your sim   
-    sigma   = np.sqrt(T)
+    sigma   = np.sqrt(T/DIM)
 
-    d = (K - s) / sigma        
+    d = (s-K) / sigma        
 
     term1 = sigma * norm.pdf(d)
-    term2 = (s - K) * (1 - norm.cdf(d))
+    term2 = (s - K) * norm.cdf(d)
 
     C_integral = term1 + term2
     
