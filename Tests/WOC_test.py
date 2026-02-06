@@ -16,7 +16,7 @@ from bachelier_options import bachelier_formula
 
 # ── PARAMETERS ──────────────────────────────────────────────────────────────
 T_total = 1.0 #terminal horizon
-DIM     = 20 #dimension
+DIM     = 2 #dimension
 S       = 25e-3  # scaling parameter
 N_ZEROS = 40 # number of terms in the Fourier-Bessel series
 INV_R   = 2000 # table for inverse distribution function for distance

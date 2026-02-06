@@ -13,10 +13,10 @@ DIM     = 2 #dimension
 import time
 import random
 epsilon = 1e-4 # small threshold to stop
-x       = np.full(DIM, 1., dtype=np.float64)# the starting point
+x       = np.full(DIM, 100., dtype=np.float64)# the starting point
+K       = x.mean() #strike price
 _eps    = np.finfo(np.float64).eps # small number to avoid division by zero
 N_PATHS = 100_000 # number of sample paths to simulate
-K = 1.1 #strike price
 
 
 def walk_on_heat_balls_step(t_n, x_n, d, epsilon):
@@ -85,7 +85,7 @@ def _simulate_batch(n_batch: int) -> float:
     ssum = 0.0
     for _ in range(n_batch):
         final = simulate_path(T_total, x)
-        ssum += max(final[0] - K, 0.0)
+        ssum += max(sum(final)/DIM - K, 0.0)
     return ssum
 
 def simulate_path(T_rem: float,center) -> np.ndarray:
@@ -128,7 +128,8 @@ def mc_option_price() -> float:
         if i and (i % 50_000 == 0):
             print(f"Simulated {i} paths…")
         final = simulate_path(T_total,x)
-        payoffs[i] = max(final[0] - K, 0.0)
+        # print(final[-1].shape)
+        payoffs[i] = max(sum(final[-1][1:])/DIM - K, 0.0)
     return float(payoffs.mean())
 
 # ── Main ─────────────────
