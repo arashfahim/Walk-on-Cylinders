@@ -3,6 +3,7 @@ import os
 os.environ.setdefault("OMP_NUM_THREADS", "1")
 os.environ.setdefault("MKL_NUM_THREADS", "1")
 
+import json
 import math
 import time
 import random
@@ -120,10 +121,12 @@ def simulate_path(T_rem: float,x_n) -> np.ndarray:
 
 def mc_option_price() -> float:
     payoffs = np.empty(N_PATHS, dtype=np.float64)
+    sample_paths = []
     for i in range(N_PATHS):
         if i and (i % 100_000 == 0):
             print(f"Simulated {i} paths…")
         final = simulate_path(T_total,x)
+        sample_paths.append(final)
         # print(len(final)-DIM)
         payoffs[i] = max(sum(final)/DIM - K, 0.0)
     print(payoffs.shape)
