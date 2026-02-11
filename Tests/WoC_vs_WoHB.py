@@ -18,8 +18,8 @@ from CDFs import build_cdfs as build_cdfs
 
 # ── PARAMETERS ──────────────────────────────────────────────────────────────
 T_total = 10.0 # Terminal horizon
-DIM     = 50 # dimension
-S       = [0.005*i for i in range(1,40)]  # cylinder scaling parameter
+DIM     = 100 # dimension
+S       = [0.005+0.0001*i for i in range(1,400,10)]  # cylinder scaling parameter
 N_ZEROS = 200 # number of terms in the Fourier-Bessel series
 INV_R   = 2000 # table for inverse distribution function for distance
 INV_T   = 2000 # table for inverse distribution function for time
@@ -158,8 +158,10 @@ for s_ in S:
     p_surv0 = float(np.clip(p_surv0, 0.0, 1.0))
     p_exit0 = 1.0 - p_surv0
     print(f"  Survival Probability p_surv0 = {p_surv0:.6e}, Exit Probability p_exit0 = {p_exit0:.6e}")
-    if p_surv0 > 1e-2:
-        
+    if p_surv0 <= 1e-2:
+        print(f"  Skipping S={s_:.6f} due to low survival probability.")
+        break
+    else:
         u_r = np.linspace(0.0, 1.0, INV_R)
         cdf_r = np.maximum.accumulate(np.clip(cdf_r, 0.0, 1.0))
         r_star_inv = np.interp(u_r, cdf_r, r_star)
