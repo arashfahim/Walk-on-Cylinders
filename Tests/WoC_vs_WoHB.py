@@ -18,8 +18,8 @@ from CDFs import build_cdfs as build_cdfs
 
 # ── PARAMETERS ──────────────────────────────────────────────────────────────
 T_total = 10.0 # Terminal horizon
-DIM     = 5 # dimension
-S       = [0.005*i for i in range(1,300,25)]  # cylinder scaling parameter
+DIM     = 20 # dimension
+S       = [0.005*i for i in range(1,40,2)]  # cylinder scaling parameter
 N_ZEROS = 200 # number of terms in the Fourier-Bessel series
 INV_R   = 2000 # table for inverse distribution function for distance
 INV_T   = 2000 # table for inverse distribution function for time
@@ -114,7 +114,7 @@ def simulate_path_WoC(T_rem: float,center:float,s:float) -> np.ndarray:
             T_rem  -= tau
             t_0 += tau
             path = np.concatenate((path,np.insert(center,0,t_0)[None,:]), axis = 0)
-            i += tau
+            # i += tau
             continue
 
         if p_surv0 >= 1.0 - 1e-15:
@@ -147,13 +147,12 @@ def simulate_path_WoC(T_rem: float,center:float,s:float) -> np.ndarray:
 path_dict_WoC = {}
 path_dict_WoHB = {}
 p_exit = {}
+# 1) Bessel zeros
+print("Computing Bessel function zeros…")
+zeros = get_bessel_zeros(DIM, N_ZEROS)
+print(f" Retrieved {len(zeros)} zeros for ν={DIM/2 -1}")
 for s_ in S:
     print(f"Running for S = {s_} ...")
-    # 1) Bessel zeros
-    print("Computing Bessel function zeros…")
-    zeros = get_bessel_zeros(DIM, N_ZEROS)
-    print(f" Retrieved {len(zeros)} zeros for ν={DIM/2 -1}")
-
     # 2) Build CDFs (validated)
     r_star, cdf_r, p_surv0, t_star, raw_t = build_cdfs(DIM, s_, zeros, INV_R, INV_T)
     p_surv0 = float(np.clip(p_surv0, 0.0, 1.0))
@@ -171,16 +170,18 @@ for s_ in S:
         t_star_inv = np.interp(u_t, cond_exit_cdf, t_star)
     else:
         t_star_inv = np.zeros_like(u_t)
-        
-    length_WoC = [] 
-    for i in range(N_PATHS):
-        # if i and (i % 25_000 == 0):
-        #     print(f"Simulated {i} paths…")
-        woc = simulate_path_WoC(T_total,x,s_)
-        length_WoC.append(woc.shape[0]-1)   # subtract 1 to account for the initial point in WoC paths
+    
+    if p_surv0 > 1e-3:
+        print(f"Simulation of paths for $S=${s_:.6f}")
+        length_WoC = [] 
+        for i in range(N_PATHS):
+            # if i and (i % 25_000 == 0):
+            #     print(f"Simulated {i} paths…")
+            woc = simulate_path_WoC(T_total,x,s_)
+            length_WoC.append(woc.shape[0]-1)   # subtract 1 to account for the initial point in WoC paths
 
-    path_dict_WoC[s_] = length_WoC
-    p_exit[s_] = p_exit0
+        path_dict_WoC[s_] = length_WoC
+        p_exit[s_] = p_exit0
     
     
 length_WoHB = []    
