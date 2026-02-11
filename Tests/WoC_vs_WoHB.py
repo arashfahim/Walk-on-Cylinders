@@ -18,8 +18,8 @@ from CDFs import build_cdfs as build_cdfs
 
 # ── PARAMETERS ──────────────────────────────────────────────────────────────
 T_total = 10.0 # Terminal horizon
-DIM     = 20 # dimension
-S       = [0.005*i for i in range(1,40,2)]  # cylinder scaling parameter
+DIM     = 50 # dimension
+S       = [0.005*i for i in range(1,40)]  # cylinder scaling parameter
 N_ZEROS = 200 # number of terms in the Fourier-Bessel series
 INV_R   = 2000 # table for inverse distribution function for distance
 INV_T   = 2000 # table for inverse distribution function for time
@@ -158,20 +158,21 @@ for s_ in S:
     p_surv0 = float(np.clip(p_surv0, 0.0, 1.0))
     p_exit0 = 1.0 - p_surv0
     print(f"  Survival Probability p_surv0 = {p_surv0:.6e}, Exit Probability p_exit0 = {p_exit0:.6e}")
+    if p_surv0 > 1e-2:
+        
+        u_r = np.linspace(0.0, 1.0, INV_R)
+        cdf_r = np.maximum.accumulate(np.clip(cdf_r, 0.0, 1.0))
+        r_star_inv = np.interp(u_r, cdf_r, r_star)
+        
+        
+        u_t = np.linspace(0.0, 1.0, INV_T)
+        if p_exit0 > 0.0:
+            cond_exit_cdf = np.maximum.accumulate(np.clip(raw_t / p_exit0, 0.0, 1.0))
+            t_star_inv = np.interp(u_t, cond_exit_cdf, t_star)
+        else:
+            t_star_inv = np.zeros_like(u_t)
     
-    u_r = np.linspace(0.0, 1.0, INV_R)
-    cdf_r = np.maximum.accumulate(np.clip(cdf_r, 0.0, 1.0))
-    r_star_inv = np.interp(u_r, cdf_r, r_star)
-    
-    
-    u_t = np.linspace(0.0, 1.0, INV_T)
-    if p_exit0 > 0.0:
-        cond_exit_cdf = np.maximum.accumulate(np.clip(raw_t / p_exit0, 0.0, 1.0))
-        t_star_inv = np.interp(u_t, cond_exit_cdf, t_star)
-    else:
-        t_star_inv = np.zeros_like(u_t)
-    
-    if p_surv0 > 1e-3:
+
         print(f"Simulation of paths for $S=${s_:.6f}")
         length_WoC = [] 
         for i in range(N_PATHS):
