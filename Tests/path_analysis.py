@@ -19,7 +19,7 @@ from CDFs import build_cdfs as build_cdfs
 # ── PARAMETERS ──────────────────────────────────────────────────────────────
 T_total = 10.0 # Terminal horizon
 DIM     = 2 # dimension
-S       = 0.01  # cylinder scaling parameter
+S       = 0.1  # cylinder scaling parameter
 N_ZEROS = 200 # number of terms in the Fourier-Bessel series
 INV_R   = 2000 # table for inverse distribution function for distance
 INV_T   = 2000 # table for inverse distribution function for time
@@ -180,15 +180,11 @@ for i in range(N_PATHS):
     #     print(f"Simulated {i} paths…")
     woc = simulate_path_WoC(T_total,x,S)
     wohb = simulate_path_WoHB(T_total,x)
-    sample_paths_WoC.append(woc[-1])
-    sample_paths_WoHB.append(wohb[-1])
+    sample_paths_WoC.append(woc)
+    sample_paths_WoHB.append(wohb)
   
   
-end_woc = np.array(sample_paths_WoC)
-end_wohb = np.array(sample_paths_WoHB)
 
-print("WoC:", end_woc[:,1].mean())
-print("WoHB:", end_wohb[:,1].mean())
 # length_WoC = []
 # for s in sample_paths_WoC:
 #     length_WoC.append(s.shape[0])
@@ -203,11 +199,27 @@ print("WoHB:", end_wohb[:,1].mean())
 # length_WoHB = np.array(length_WoHB)
 # dict_WoHB[S] = length_WoHB.tolist()
 
-    
-    
+times_WoC = []
+for sp in sample_paths_WoC:
+    for s in sp:
+        if s[0]>0 and s[0] < T_total:
+            times_WoC.append(s[0])
+times_WoC = np.array(times_WoC)
+
+times_WoHB = []
+for sp in sample_paths_WoHB:
+    for s in sp:
+        if s[0]>0 and s[0] < T_total:
+            times_WoHB.append(s[0])
+times_WoHB = np.array(times_WoHB)  
     
 # with open(f"path_length_WoC_{DIM}.json", "w") as json_file:
 #     json.dump(dict_WoC, json_file, indent=4)
 # with open(f"path_length_WoHB_{DIM}.json", "w") as json_file:
 #     json.dump(dict_WoHB, json_file, indent=4)
+with open(f"path_times_WoC_{DIM}.json", "w") as json_file:
+    json.dump(times_WoC.tolist(), json_file, indent=4)
+    
+with open(f"path_times_WoHB_{DIM}.json", "w") as json_file:
+    json.dump(times_WoHB.tolist(), json_file, indent=4)
 
