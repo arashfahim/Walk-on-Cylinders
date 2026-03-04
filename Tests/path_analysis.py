@@ -19,7 +19,7 @@ from CDFs import build_cdfs as build_cdfs
 # ── PARAMETERS ──────────────────────────────────────────────────────────────
 T_total = 10.0 # Terminal horizon
 DIM     = 2 # dimension
-S       = 0.1  # cylinder scaling parameter
+S       = np.arange(0.1, 1.1, 0.1) # cylinder scaling parameter
 N_ZEROS = 200 # number of terms in the Fourier-Bessel series
 INV_R   = 2000 # table for inverse distribution function for distance
 INV_T   = 2000 # table for inverse distribution function for time
@@ -144,45 +144,66 @@ def simulate_path_WoC(T_rem: float,center:float,s:float) -> np.ndarray:
             t_0 += tau
             path = np.concatenate((path,np.insert(center,0,t_0)[None,:]), axis = 0)
 
-dict_WoC = {}
-dict_WoHB = {}
+for s in S:
+    dict_WoC = {}
+    dict_WoHB = {}
 
 
-print(f"Running for S = {S} ...")
-# 1) Bessel zeros
-print("Computing Bessel function zeros…")
-zeros = get_bessel_zeros(DIM, N_ZEROS)
-print(f" Retrieved {len(zeros)} zeros for ν={DIM/2 -1}")
+    print(f"Running for S = {S} ...")
+    # 1) Bessel zeros
+    print("Computing Bessel function zeros…")
+    zeros = get_bessel_zeros(DIM, N_ZEROS)
+    print(f" Retrieved {len(zeros)} zeros for ν={DIM/2 -1}")
 
-# 2) Build CDFs (validated)
-r_star, cdf_r, p_surv0, t_star, raw_t = build_cdfs(DIM, S, zeros, INV_R, INV_T)
-p_surv0 = float(np.clip(p_surv0, 0.0, 1.0))
-p_exit0 = 1.0 - p_surv0
-print(f"  Survival Probability p_surv0 = {p_surv0:.6e}, Exit Probability p_exit0 = {p_exit0:.6e}")
+    # 2) Build CDFs (validated)
+    r_star, cdf_r, p_surv0, t_star, raw_t = build_cdfs(DIM, s, zeros, INV_R, INV_T)
+    p_surv0 = float(np.clip(p_surv0, 0.0, 1.0))
+    p_exit0 = 1.0 - p_surv0
+    print(f"  Survival Probability p_surv0 = {p_surv0:.6e}, Exit Probability p_exit0 = {p_exit0:.6e}")
 
-u_r = np.linspace(0.0, 1.0, INV_R)
-cdf_r = np.maximum.accumulate(np.clip(cdf_r, 0.0, 1.0))
-r_star_inv = np.interp(u_r, cdf_r, r_star)
+    u_r = np.linspace(0.0, 1.0, INV_R)
+    cdf_r = np.maximum.accumulate(np.clip(cdf_r, 0.0, 1.0))
+    r_star_inv = np.interp(u_r, cdf_r, r_star)
 
 
-u_t = np.linspace(0.0, 1.0, INV_T)
-if p_exit0 > 0.0:
-    cond_exit_cdf = np.maximum.accumulate(np.clip(raw_t / p_exit0, 0.0, 1.0))
-    t_star_inv = np.interp(u_t, cond_exit_cdf, t_star)
-else:
-    t_star_inv = np.zeros_like(u_t)
-    
-    
-sample_paths_WoC = []
+    u_t = np.linspace(0.0, 1.0, INV_T)
+    if p_exit0 > 0.0:
+        cond_exit_cdf = np.maximum.accumulate(np.clip(raw_t / p_exit0, 0.0, 1.0))
+        t_star_inv = np.interp(u_t, cond_exit_cdf, t_star)
+    else:
+        t_star_inv = np.zeros_like(u_t)
+        
+        
+    sample_paths_WoC = []
+    for i in range(N_PATHS):
+        # if i and (i % 25_000 == 0):
+        #     print(f"Simulated {i} paths…")
+        woc = simulate_path_WoC(T_total,x,s)
+        sample_paths_WoC.append(woc)
+    times_WoC = []
+    for sp in sample_paths_WoC:
+        for s in sp:
+            if s[0]>0 and s[0] < T_total:
+                times_WoC.append(s[0])
+    times_WoC = np.array(times_WoC)
+
+
+    with open(f"path_times_WoC_{DIM}_{s}.json", "w") as json_file:
+        json.dump(times_WoC.tolist(), json_file, indent=4)
+ 
 sample_paths_WoHB = []
 for i in range(N_PATHS):
-    # if i and (i % 25_000 == 0):
-    #     print(f"Simulated {i} paths…")
-    woc = simulate_path_WoC(T_total,x,S)
     wohb = simulate_path_WoHB(T_total,x)
-    sample_paths_WoC.append(woc)
-    sample_paths_WoHB.append(wohb)
-  
+    sample_paths_WoHB.append(wohb) 
+times_WoHB = []
+for sp in sample_paths_WoHB:
+    for s in sp:
+        if s[0]>0 and s[0] < T_total:
+            times_WoHB.append(s[0])
+times_WoHB = np.array(times_WoHB)     
+with open(f"path_times_WoHB_{DIM}.json", "w") as json_file:
+    json.dump(times_WoHB.tolist(), json_file, indent=4)
+
   
 
 # length_WoC = []
@@ -217,9 +238,9 @@ times_WoHB = np.array(times_WoHB)
 #     json.dump(dict_WoC, json_file, indent=4)
 # with open(f"path_length_WoHB_{DIM}.json", "w") as json_file:
 #     json.dump(dict_WoHB, json_file, indent=4)
-with open(f"path_times_WoC_{DIM}.json", "w") as json_file:
+with open(f"path_times_WoC_{DIM}_{S}.json", "w") as json_file:
     json.dump(times_WoC.tolist(), json_file, indent=4)
     
-with open(f"path_times_WoHB_{DIM}.json", "w") as json_file:
+with open(f"path_times_WoHB_{DIM}_{S}.json", "w") as json_file:
     json.dump(times_WoHB.tolist(), json_file, indent=4)
 
