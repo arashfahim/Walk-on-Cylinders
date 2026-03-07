@@ -18,17 +18,25 @@ from CDFs import build_cdfs as build_cdfs
 
 # ── PARAMETERS ──────────────────────────────────────────────────────────────
 T_total = 10.0 # Terminal horizon
-DIM     = 2 # dimension
-S       = np.arange(0.1, 1.1, 0.1) # cylinder scaling parameter
+dims     = [2, 10, 50, 100] # dimensions
+def s_range(d):
+    if d == 100:
+        S = np.arange(0.0073, 0.0123, 0.001) # cylinder scaling parameter
+    elif d == 50:
+        S = np.arange(0.0129, 0.0264, 0.002) # cylinder scaling parameter
+    elif d == 10:
+        S = np.arange(0.04, 0.17, 0.01) # cylinder scaling parameter
+    elif d == 2:
+        S = np.arange(0.1, 1.1, 0.1) # cylinder scaling parameter
+    return S
 N_ZEROS = 200 # number of terms in the Fourier-Bessel series
 INV_R   = 2000 # table for inverse distribution function for distance
 INV_T   = 2000 # table for inverse distribution function for time
 K       = 1.1
-x       = np.full(DIM, 0., dtype=np.float64)# the starting point
 N_PATHS = 1_000 # number of sample paths to simulate
 tol     = 0 # stopping criteria
 _eps    = np.finfo(np.float64).eps # small number to avoid division by zero
-nu  = DIM/2.0 - 1.0 # order of Bessel function
+# nu  = DIM/2.0 - 1.0 # order of Bessel function
 epsilon = 1e-4 # small threshold to stop WoHB
 
 def walk_on_heat_balls_step(t_n, x_n, d, epsilon):
@@ -71,7 +79,7 @@ def walk_on_heat_balls_step(t_n, x_n, d, epsilon):
     
     return t_next, x_next
 
-def simulate_path_WoHB(T_rem: float,center) -> np.ndarray:
+def simulate_path_WoHB(DIM: int, T_rem: float,center) -> np.ndarray:
     t_0 = 0# initial time
     path = np.insert(center, 0, t_0)[None,:]# initialize path with starting point
     while True:
@@ -85,7 +93,7 @@ def simulate_path_WoHB(T_rem: float,center) -> np.ndarray:
             path = np.concatenate((path,np.insert(center,0,t_0)[None,:]), axis = 0)   
 
 
-def simulate_path_WoC(T_rem: float,center:float,s:float) -> np.ndarray:
+def simulate_path_WoC(DIM: int, T_rem: float,center:float,s:float) -> np.ndarray:
     t_0 = 0
     path = np.insert(center, 0, t_0)[None,:]
     while True:
@@ -144,67 +152,67 @@ def simulate_path_WoC(T_rem: float,center:float,s:float) -> np.ndarray:
             t_0 += tau
             path = np.concatenate((path,np.insert(center,0,t_0)[None,:]), axis = 0)
 
-for s in S:
-    dict_WoC = {}
-    dict_WoHB = {}
+dict_WoC = {d: {} for d in dims}
+dict_WoHB = {}
+for d in dims:
+    S = s_range(d)
+    for s in S:
+        print(f"Running for s = {s} and dimension d = {d}…")
+        # 1) Bessel zeros
+        # print("Computing Bessel function zeros…")
+        zeros = get_bessel_zeros(d, N_ZEROS)
+        # print(f" Retrieved {len(zeros)} zeros for ν={d/2 -1}")
+
+        # 2) Build CDFs (validated)
+        r_star, cdf_r, p_surv0, t_star, raw_t = build_cdfs(d, s, zeros, INV_R, INV_T)
+        p_surv0 = float(np.clip(p_surv0, 0.0, 1.0))
+        p_exit0 = 1.0 - p_surv0
+        # print(f"  Survival Probability p_surv0 = {p_surv0:.6e}, Exit Probability p_exit0 = {p_exit0:.6e}")
+
+        u_r = np.linspace(0.0, 1.0, INV_R)
+        cdf_r = np.maximum.accumulate(np.clip(cdf_r, 0.0, 1.0))
+        r_star_inv = np.interp(u_r, cdf_r, r_star)
 
 
-    print(f"Running for S = {S} ...")
-    # 1) Bessel zeros
-    print("Computing Bessel function zeros…")
-    zeros = get_bessel_zeros(DIM, N_ZEROS)
-    print(f" Retrieved {len(zeros)} zeros for ν={DIM/2 -1}")
-
-    # 2) Build CDFs (validated)
-    r_star, cdf_r, p_surv0, t_star, raw_t = build_cdfs(DIM, s, zeros, INV_R, INV_T)
-    p_surv0 = float(np.clip(p_surv0, 0.0, 1.0))
-    p_exit0 = 1.0 - p_surv0
-    print(f"  Survival Probability p_surv0 = {p_surv0:.6e}, Exit Probability p_exit0 = {p_exit0:.6e}")
-
-    u_r = np.linspace(0.0, 1.0, INV_R)
-    cdf_r = np.maximum.accumulate(np.clip(cdf_r, 0.0, 1.0))
-    r_star_inv = np.interp(u_r, cdf_r, r_star)
-
-
-    u_t = np.linspace(0.0, 1.0, INV_T)
-    if p_exit0 > 0.0:
-        cond_exit_cdf = np.maximum.accumulate(np.clip(raw_t / p_exit0, 0.0, 1.0))
-        t_star_inv = np.interp(u_t, cond_exit_cdf, t_star)
-    else:
-        t_star_inv = np.zeros_like(u_t)
-        
-        
-    sample_paths_WoC = []
+        u_t = np.linspace(0.0, 1.0, INV_T)
+        if p_exit0 > 0.0:
+            cond_exit_cdf = np.maximum.accumulate(np.clip(raw_t / p_exit0, 0.0, 1.0))
+            t_star_inv = np.interp(u_t, cond_exit_cdf, t_star)
+        else:
+            t_star_inv = np.zeros_like(u_t)
+            
+            
+        sample_paths_WoC = []
+        for i in range(N_PATHS):
+            x = np.full(d, 0., dtype=np.float64)
+            woc = simulate_path_WoC(d,T_total,x,s)
+            sample_paths_WoC.append(woc)
+        times_WoC = []
+        for sp in sample_paths_WoC:
+            for st in sp:
+                if st[0]>0 and st[0] < T_total:
+                    times_WoC.append(st[0])
+        dict_WoC[d][s] = times_WoC
+    sample_paths_WoHB = []
     for i in range(N_PATHS):
-        # if i and (i % 25_000 == 0):
-        #     print(f"Simulated {i} paths…")
-        woc = simulate_path_WoC(T_total,x,s)
-        sample_paths_WoC.append(woc)
-    times_WoC = []
-    for sp in sample_paths_WoC:
+        x = np.full(d, 0., dtype=np.float64)# the starting point
+        wohb = simulate_path_WoHB(d,T_total,x)
+        sample_paths_WoHB.append(wohb) 
+    times_WoHB = []
+    for sp in sample_paths_WoHB:
         for s in sp:
             if s[0]>0 and s[0] < T_total:
-                times_WoC.append(s[0])
-    times_WoC = np.array(times_WoC)
+                times_WoHB.append(s[0])
+    times_WoHB = np.array(times_WoHB)   
 
 
-    with open(f"path_times_WoC_{DIM}_{s}.json", "w") as json_file:
-        json.dump(times_WoC.tolist(), json_file, indent=4)
- 
-sample_paths_WoHB = []
-for i in range(N_PATHS):
-    wohb = simulate_path_WoHB(T_total,x)
-    sample_paths_WoHB.append(wohb) 
-times_WoHB = []
-for sp in sample_paths_WoHB:
-    for s in sp:
-        if s[0]>0 and s[0] < T_total:
-            times_WoHB.append(s[0])
-times_WoHB = np.array(times_WoHB)     
-with open(f"path_times_WoHB_{DIM}.json", "w") as json_file:
+with open(f"path_times_WoC.json", "w") as json_file:
+    json.dump(dict_WoC, json_file, indent=4)
+
+with open(f"path_times_WoHB.json", "w") as json_file:
     json.dump(times_WoHB.tolist(), json_file, indent=4)
 
-  
+
 
 # length_WoC = []
 # for s in sample_paths_WoC:
@@ -220,27 +228,12 @@ with open(f"path_times_WoHB_{DIM}.json", "w") as json_file:
 # length_WoHB = np.array(length_WoHB)
 # dict_WoHB[S] = length_WoHB.tolist()
 
-times_WoC = []
-for sp in sample_paths_WoC:
-    for s in sp:
-        if s[0]>0 and s[0] < T_total:
-            times_WoC.append(s[0])
-times_WoC = np.array(times_WoC)
 
-times_WoHB = []
-for sp in sample_paths_WoHB:
-    for s in sp:
-        if s[0]>0 and s[0] < T_total:
-            times_WoHB.append(s[0])
-times_WoHB = np.array(times_WoHB)  
+
     
 # with open(f"path_length_WoC_{DIM}.json", "w") as json_file:
 #     json.dump(dict_WoC, json_file, indent=4)
 # with open(f"path_length_WoHB_{DIM}.json", "w") as json_file:
 #     json.dump(dict_WoHB, json_file, indent=4)
-with open(f"path_times_WoC_{DIM}_{S}.json", "w") as json_file:
-    json.dump(times_WoC.tolist(), json_file, indent=4)
     
-with open(f"path_times_WoHB_{DIM}_{S}.json", "w") as json_file:
-    json.dump(times_WoHB.tolist(), json_file, indent=4)
 
