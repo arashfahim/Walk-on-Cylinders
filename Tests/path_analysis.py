@@ -153,7 +153,7 @@ def simulate_path_WoC(DIM: int, T_rem: float,center:float,s:float) -> np.ndarray
             path = np.concatenate((path,np.insert(center,0,t_0)[None,:]), axis = 0)
 
 dict_WoC = {d: {} for d in dims}
-dict_WoHB = {}
+dict_WoHB = {d: {} for d in dims}
 for d in dims:
     S = s_range(d)
     for s in S:
@@ -203,14 +203,14 @@ for d in dims:
         for s in sp:
             if s[0]>0 and s[0] < T_total:
                 times_WoHB.append(s[0])
-    times_WoHB = np.array(times_WoHB)   
+    dict_WoHB[d]['wohb'] = times_WoHB
 
 
 with open(f"path_times_WoC.json", "w") as json_file:
     json.dump(dict_WoC, json_file, indent=4)
 
 with open(f"path_times_WoHB.json", "w") as json_file:
-    json.dump(times_WoHB.tolist(), json_file, indent=4)
+    json.dump(times_WoHB, json_file, indent=4)
 
 
 
