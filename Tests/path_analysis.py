@@ -210,7 +210,7 @@ with open(f"path_times_WoC.json", "w") as json_file:
     json.dump(dict_WoC, json_file, indent=4)
 
 with open(f"path_times_WoHB.json", "w") as json_file:
-    json.dump(times_WoHB, json_file, indent=4)
+    json.dump(dict_WoHB, json_file, indent=4)
 
 
 
