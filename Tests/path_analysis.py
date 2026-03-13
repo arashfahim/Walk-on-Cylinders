@@ -19,15 +19,16 @@ from CDFs import build_cdfs as build_cdfs
 # ── PARAMETERS ──────────────────────────────────────────────────────────────
 T_total = 10.0 # Terminal horizon
 dims     = [2, 10, 50, 100] # dimensions
+ds = 7.4775e-05 # step size for s, chosen to ensure we have enough points in the range for all dimensions
 def s_range(d):
     if d == 100:
-        S = np.arange(0.0073, 0.0123, 0.001) # cylinder scaling parameter
+        S = np.arange(0.0068928, 0.013996425, ds) # cylinder scaling parameter
     elif d == 50:
-        S = np.arange(0.0129, 0.0264, 0.002) # cylinder scaling parameter
+        S = np.arange(0.012650475, 0.028801875, ds) # cylinder scaling parameter
     elif d == 10:
-        S = np.arange(0.04, 0.17, 0.01) # cylinder scaling parameter
+        S = np.arange(0.028502775, 0.27084855, ds) # cylinder scaling parameter
     elif d == 2:
-        S = np.arange(0.1, 1.1, 0.1) # cylinder scaling parameter
+        S = np.arange(0.064544325, 1.326447225, ds) # cylinder scaling parameter
     return S
 N_ZEROS = 200 # number of terms in the Fourier-Bessel series
 INV_R   = 2000 # table for inverse distribution function for distance
@@ -190,7 +191,7 @@ for d in dims:
         times_WoC = []
         for sp in sample_paths_WoC:
             for st in sp:
-                if st[0]>0 and st[0] < T_total:
+                if st[0]>=0 and st[0] <= T_total:
                     times_WoC.append(st[0])
         dict_WoC[d][s] = times_WoC
     sample_paths_WoHB = []
@@ -201,7 +202,7 @@ for d in dims:
     times_WoHB = []
     for sp in sample_paths_WoHB:
         for s in sp:
-            if s[0]>0 and s[0] < T_total:
+            if s[0]>=0 and s[0] <= T_total:
                 times_WoHB.append(s[0])
     dict_WoHB[d]['wohb'] = times_WoHB
 
