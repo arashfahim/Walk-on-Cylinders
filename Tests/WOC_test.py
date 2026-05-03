@@ -180,6 +180,7 @@ def mc_option_price_parallel(n_paths: int, n_workers: int | None = None, batch: 
 
 # ── Main ────────────────────────────────────────────────────────────────────
 if __name__ == '__main__':
+    t1=time.time()  
     USE_PARALLEL = True  # toggle to False to use single-core version
     t0 = time.time()
     if USE_PARALLEL:
@@ -191,3 +192,4 @@ if __name__ == '__main__':
     print(f"Monte Carlo price: {C_MC:.6f}")
     print(f"Bachelier formula: {C_Bachelier:.6f}")
     print(f"Relative Error:             {100*(C_MC - C_Bachelier)/C_Bachelier:.6f} %")
+    print(f"Total execution time: {time.time() - t1:.2f} seconds.")
