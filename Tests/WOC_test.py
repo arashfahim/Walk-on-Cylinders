@@ -2,7 +2,7 @@
 import os
 os.environ.setdefault("OMP_NUM_THREADS", "1")
 os.environ.setdefault("MKL_NUM_THREADS", "1")
-
+from typing import Optional
 import json
 import math
 import time
@@ -156,7 +156,7 @@ def _simulate_batch(n_batch: int) -> float:
     return ssum
 
 
-def mc_option_price_parallel(n_paths: int, n_workers: int | None = None, batch: int = 50_000) -> float:
+def mc_option_price_parallel(n_paths: int, n_workers: Optional[int] = None, batch: int = 50_000) -> float:
     if n_workers is None:
         # leave one core free by default
         n_workers = max(1, (os.cpu_count() or 2) - 1)
