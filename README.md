@@ -4,7 +4,7 @@ At the header of your code you need the lines:
 from bessel_zeros import get_bessel_zeros
 from CDFs3_working import build_cdfs as build_cdfs
 ```
-In `WOC4.py` we simulate paths of Brownian motion and test our simulation in an option pricing problem. The function that simulates the paths is `def simulate_path(T_rem: float) -> np.ndarray:`
+In `WOC_test.py` we simulate paths of Brownian motion and test our simulation in an option pricing problem. The function that simulates the paths is `def simulate_path(T_rem: float) -> np.ndarray:`
 We also need to define these parameters. 
 ```
 # ── PARAMETERS ──────────────────────────────────────────────────────────────
